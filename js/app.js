@@ -21,7 +21,8 @@ const topics = () => [...new Set(Vocab.entries.map(e => e.topic))];
 function renderTop() {
   const p = Store.profile;
   $('#top').innerHTML = `<div class="logo">IELTS <b>6.5</b></div>
-    <div class="pills"><span class="pill fire" title="Chuỗi ngày học liên tiếp">🔥 ${p.streak}</span><span class="pill xp" title="Tổng điểm XP">⭐ ${p.xp}</span></div>`;
+    <div class="pills"><span class="pill fire" title="Chuỗi ngày học liên tiếp">🔥 ${effectiveStreak()}</span><span class="pill xp" title="Tổng điểm XP">⭐ ${p.xp}</span><span class="pill coin" title="Xu">🪙 ${p.coins}</span><span class="pill sync" id="syncpill" hidden></span></div>`;
+  setSyncStatus(Sync.cfg() ? (Sync.status === 'off' ? 'ok' : Sync.status) : 'off');
 }
 
 function ring(v, max) {
@@ -34,6 +35,7 @@ function viewHome() {
   const s = stats(), p = Store.profile, xt = Store.xpToday();
   const opts = ['<option value="all">Tất cả chủ đề</option>', ...topics().map(t => `<option ${t === topicFilter ? 'selected' : ''}>${esc(t)}</option>`)].join('');
   $('#view').innerHTML = `
+  ${petCardHTML()}
   <section class="card goal">
     ${ring(xt, p.goal)}
     <div><h2>Mục tiêu hôm nay</h2><p>${xt}/${p.goal} XP${xt >= p.goal ? ' – tuyệt vời! 🎉' : ' – học 1 bài ≈ 80–120 XP'}</p>
@@ -52,9 +54,15 @@ function viewHome() {
     <button class="btn blue" data-start="new" ${s.fresh ? '' : 'disabled'}>✨ Chỉ học từ mới</button>
     <button class="btn purple" data-start="review" ${s.learned ? '' : 'disabled'}>🔁 Chỉ ôn tập</button>
   </div>`}
-  <p class="tip">💡 Mỗi bài ~10–15 phút gồm: thẻ từ mới (ảnh, phiên âm, câu mẫu, video) → trắc nghiệm → nghe → điền từ → viết → nói. Từ sai sẽ được ôn lại sớm hơn (lặp lại ngắt quãng).</p>`;
+  <section class="card grammar"><h2>✏️ Ngữ pháp & cách dùng từ</h2>
+    <p class="muted">10 câu mỗi bài: chọn đáp án, xếp câu, nghe câu mẫu. Tự ưu tiên chủ đề bạn hay sai.</p>
+    <select id="gtopic"><option value="all">Tất cả chủ đề ngữ pháp</option>${G_TOPICS.map(t => { const st = gStat(t), n = st.ok + st.bad; return `<option value="${esc(t)}">${esc(t)}${n ? ` (${Math.round(st.ok / n * 100)}% đúng)` : ''}</option>`; }).join('')}</select>
+    <button class="btn blue" id="gstart">▶ Luyện ngữ pháp</button></section>
+  <p class="tip">💡 Mỗi bài ~10–15 phút gồm: thẻ từ mới (ảnh, phiên âm, câu mẫu, video) → trắc nghiệm → nghe → điền từ → xếp câu → viết → nói. Từ sai sẽ được ôn lại sớm hơn (lặp lại ngắt quãng).</p>`;
   $('#topic')?.addEventListener('change', e => { topicFilter = e.target.value; });
   $$('[data-start]').forEach(b => b.onclick = () => startLesson(b.dataset.start));
+  $('#gstart').onclick = () => startGrammar($('#gtopic').value);
+  $('#chest')?.addEventListener('click', openChest);
 }
 
 /* ---------- Trang Từ vựng ---------- */
@@ -104,6 +112,34 @@ function viewSettings() {
       <select id="sound"><option value="1" ${p.sound ? 'selected' : ''}>Bật</option><option value="0" ${!p.sound ? 'selected' : ''}>Tắt</option></select></label>
   </section>
   <section class="card">
+    <h2>🤖 Giám khảo AI (tùy chọn)</h2>
+    <p>Dán API key của Claude để: <b>tạo đề Reading/Listening mới theo chủ đề bạn chọn</b>, chấm <b>Writing & Speaking</b> như giám khảo thật, nhận xét chi tiết bằng tiếng Việt. Key chỉ lưu trong trình duyệt của bạn (không gửi đi đâu ngoài Anthropic). Mỗi lần dùng bị tính phí theo tài khoản Anthropic (thường vài cent). Lấy key ở console.anthropic.com – <b>không dùng trên máy dùng chung</b>.</p>
+    <input id="ai-key" type="password" autocomplete="off" placeholder="sk-ant-…" value="${esc(AI.cfg().key)}">
+    <select id="ai-model">${AI_MODELS.map(([v, n]) => `<option value="${v}" ${AI.cfg().model === v ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    <div class="row2"><button class="btn blue" id="ai-save">Lưu & kiểm tra</button><button class="btn ghost" id="ai-clear">Xóa key</button></div>
+    <p class="muted" id="ai-msg">${AI.has() ? '✅ Đã bật AI.' : 'Chưa bật – app vẫn dùng đề có sẵn và chấm ước lượng.'}</p>
+  </section>
+  <section class="card">
+    <h2>🖼️ Ảnh minh họa đẹp hơn (tùy chọn)</h2>
+    <p>Ảnh tự động đôi khi không sát nghĩa với từ trừu tượng. Bạn luôn có thể bấm <b>🔎 Tìm ảnh</b> ở thẻ từ để chọn ảnh khác. Thêm key Pixabay (miễn phí, pixabay.com/api/docs) để có nhiều ảnh đẹp, chuyên nghiệp hơn.</p>
+    <input id="px-key" type="password" autocomplete="off" placeholder="Pixabay API key" value="${esc(LS.get('ielts.keys', {}).pixabay || '')}">
+    <button class="btn blue" id="px-save">Lưu key Pixabay</button>
+  </section>
+  <section class="card">
+    <h2>☁️ Đồng bộ iPad ↔ điện thoại</h2>
+    <p>Học trên thiết bị nào cũng giữ nguyên tiến độ, XP, xu, thú cưng, lịch sử thi. Dữ liệu được <b>mã hóa trên máy bạn</b> bằng mật khẩu trước khi gửi đi. Cần 1 lần thiết lập máy chủ miễn phí (xem README, mục “Đồng bộ”). Ở mỗi thiết bị, nhập cùng một địa chỉ, ID và mật khẩu.</p>
+    <input id="sy-url" type="url" placeholder="Địa chỉ máy chủ, ví dụ https://ielts-sync.ten-ban.workers.dev" value="${esc(Sync.cfg()?.url || '')}">
+    <input id="sy-id" type="text" autocapitalize="none" placeholder="ID của bạn (3–64 ký tự, vd: lan-ielts-2026)" value="${esc(Sync.cfg()?.id || '')}">
+    <input id="sy-pw" type="password" placeholder="Mật khẩu (ghi nhớ kỹ – mất là không khôi phục được)">
+    <div class="row2"><button class="btn green" id="sy-go">${Sync.cfg() ? 'Kết nối lại' : 'Kết nối & đồng bộ'}</button><button class="btn ghost" id="sy-now" ${Sync.cfg() ? '' : 'disabled'}>Đồng bộ ngay</button></div>
+    ${Sync.cfg() ? '<button class="btn ghost" id="sy-off">Ngắt kết nối thiết bị này</button>' : ''}
+    <p class="sync-status" id="sy-msg">${Sync.cfg() ? (Sync.status === 'err' ? '⚠️ ' + esc(Sync.err) : '☁️ Đã kết nối ID “' + esc(Sync.cfg().id) + '”') : ''}</p>
+    <h3>Cách không cần máy chủ: mã đồng bộ</h3>
+    <p class="muted">Sao chép mã ở thiết bị này → gửi qua Zalo/Messenger/Ghi chú → dán vào thiết bị kia. Hai bên sẽ được gộp lại.</p>
+    <div class="row2"><button class="btn blue" id="sy-copy">📋 Sao chép mã của tôi</button><button class="btn purple" id="sy-paste">📥 Nhập mã</button></div>
+    <textarea id="sy-code" rows="2" placeholder="Dán mã IELTS1:… vào đây rồi bấm Nhập mã"></textarea>
+  </section>
+  <section class="card">
     <h2>🧹 Dữ liệu</h2>
     <button class="btn ghost" id="clrcache">Xóa bộ nhớ đệm từ điển (tải lại ảnh/định nghĩa)</button>
     <button class="btn danger" id="reset">Xóa toàn bộ tiến độ học</button>
@@ -127,6 +163,25 @@ function viewSettings() {
   $('#accent').onchange = e => { p.accent = e.target.value; Store.save(); };
   $('#sound').onchange = e => { p.sound = e.target.value === '1'; Store.save(); };
   $('#clrcache').onclick = () => { clearCache(); toast('Đã xóa bộ nhớ đệm'); };
+  $('#ai-save').onclick = async () => {
+    const key = $('#ai-key').value.trim(), m = $('#ai-msg'); AI.save({ key, model: $('#ai-model').value });
+    if (!key) { m.textContent = 'Đã tắt AI.'; return; }
+    m.textContent = 'Đang kiểm tra key…';
+    try { await aiCall({ system: 'Reply with the single word OK.', user: 'ping', max: 50, effort: 'low' }); m.textContent = '✅ Key hợp lệ – đã bật AI.'; }
+    catch (e) { m.textContent = '❌ Không dùng được: ' + e.message; }
+  };
+  $('#ai-clear').onclick = () => { AI.save({ key: '', model: $('#ai-model').value }); $('#ai-key').value = ''; $('#ai-msg').textContent = 'Đã xóa key.'; };
+  $('#px-save').onclick = () => { const k = LS.get('ielts.keys', {}); k.pixabay = $('#px-key').value.trim(); LS.set('ielts.keys', k); clearCache(); toast('Đã lưu. Ảnh sẽ được tải lại khi học.'); };
+  $('#sy-go').onclick = async () => {
+    const url = $('#sy-url').value.trim(), id = $('#sy-id').value.trim(), pw = $('#sy-pw').value, m = $('#sy-msg');
+    if (!/^https:\/\//.test(url) || !/^[A-Za-z0-9_.-]{3,64}$/.test(id) || pw.length < 6) { m.textContent = '⚠️ Cần địa chỉ https://…, ID 3–64 ký tự (chữ/số/-_.) và mật khẩu ≥ 6 ký tự.'; return; }
+    m.textContent = 'Đang kết nối…';
+    try { const ok = await connectSync(url, id, pw); m.textContent = ok ? '✅ Đã đồng bộ!' : '⚠️ ' + Sync.err; if (ok) viewSettings(); } catch (e) { m.textContent = '⚠️ ' + e.message; }
+  };
+  $('#sy-now').onclick = async () => { $('#sy-msg').textContent = 'Đang đồng bộ…'; const ok = await syncNow(); $('#sy-msg').textContent = ok ? '✅ Đã đồng bộ lúc ' + new Date().toLocaleTimeString() : '⚠️ ' + Sync.err; };
+  $('#sy-off')?.addEventListener('click', () => { disconnectSync(); viewSettings(); });
+  $('#sy-copy').onclick = async () => { const c = await packCode(); try { await navigator.clipboard.writeText(c); toast('Đã sao chép mã đồng bộ'); } catch { $('#sy-code').value = c; toast('Hãy sao chép mã trong ô bên dưới'); } };
+  $('#sy-paste').onclick = async () => { try { await importCode($('#sy-code').value); toast('Đã nhập & gộp dữ liệu'); } catch (e) { toast('Mã không hợp lệ'); } };
   $('#reset').onclick = () => {
     if (!confirm('Xóa toàn bộ tiến độ, XP và chuỗi ngày học?')) return;
     LS.del('ielts.progress'); LS.del('ielts.profile'); location.reload();
@@ -136,7 +191,7 @@ function viewSettings() {
 function renderAll() {
   renderTop();
   $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
-  ({ home: viewHome, words: viewWords, settings: viewSettings })[tab]();
+  ({ home: viewHome, speaking: viewSpeaking, exam: viewExam, words: viewWords, shop: viewShop, settings: viewSettings })[tab]();
 }
 
 /* ============ Thẻ từ vựng giàu nội dung (dùng cho bài học & xem chi tiết) ============ */
@@ -147,8 +202,8 @@ function wordCardHTML(w) {
   const q = encodeURIComponent(w.word);
   return `<div class="wcard">
   <div class="wimg">${img ? `<img src="${esc(img.src)}" alt="" referrerpolicy="no-referrer" data-i="0" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'noimg',textContent:'🖼️'}))">` : `<div class="noimg">${esc(w.word[0].toUpperCase())}</div>`}
-    ${w.images?.length > 1 ? `<button class="chip sm" data-act="nextimg">🔄 Ảnh khác</button>` : ''}
-    <small class="credit">${esc(img?.credit || '')}</small></div>
+    <div class="imgbtns">${w.images?.length > 1 ? `<button class="chip sm" data-act="nextimg">🔄 Ảnh khác</button>` : ''}<button class="chip sm" data-act="findimg">🔎 Tìm ảnh</button></div>
+    <small class="credit">${img?.pinned ? '📌 Ảnh bạn đã chọn · ' : 'Ảnh gợi ý tự động (có thể chưa sát nghĩa – bấm “Tìm ảnh” để chọn ảnh khác) · '}${esc(img?.credit || '')}</small></div>
   <h2 class="wword">${esc(w.word)}</h2>
   <div class="wipa">${esc(w.phonetic || '')}</div>
   <div class="audiobar">
@@ -193,6 +248,8 @@ function bindWordCard(root, w) {
     } else if (act === 'nextimg') {
       imgI = (imgI + 1) % w.images.length; const im = $('.wimg img', root), im2 = w.images[imgI];
       if (im) im.src = im2.src; $('.credit', root).textContent = im2.credit || '';
+    } else if (act === 'findimg') {
+      openImagePicker(w, im => { const el = $('.wimg img', root); if (el) el.src = im.src; else $('.noimg', root)?.replaceWith(Object.assign(document.createElement('img'), { src: im.src, referrerPolicy: 'no-referrer' })); $('.credit', root).textContent = '📌 Ảnh bạn đã chọn · ' + (im.credit || ''); });
     } else if (act === 'mic') {
       const out = $('.micres', root); out.textContent = '🎙️ Hãy đọc to…';
       try {
@@ -211,6 +268,33 @@ function bindWordCard(root, w) {
   });
 }
 
+/* ---------- Chọn ảnh minh họa cho 1 từ ---------- */
+function pinImage(w, im) {
+  const pk = LS.get('ielts.imgpick', {}); pk[w.key] = { src: im.src, credit: im.credit || '', link: im.link || '' };
+  LS.set('ielts.imgpick', pk); window.onStoreSave?.();
+  w.images = [{ ...pk[w.key], pinned: true }, ...(w.images || []).filter(i => i.src !== im.src && !i.pinned)];
+}
+function openImagePicker(w, onPick) {
+  const d = document.createElement('div'); d.className = 'popup';
+  d.innerHTML = `<div class="pbox wide"><h3>Chọn ảnh cho “${esc(w.word)}”</h3>
+    <div class="searchbar"><input id="ip-q" value="${esc(w.word)}" placeholder="Từ khóa tiếng Anh"><button class="btn blue sm" id="ip-go">Tìm</button></div>
+    <p class="muted">Mẹo: từ trừu tượng nên tìm bằng từ cụ thể hơn (vd: “flood”, “solar panel” cho <i>mitigate</i>). Bấm vào ảnh để chọn.</p>
+    <div class="imggrid" id="ip-grid"><p class="muted">Đang tìm…</p></div>
+    <input id="ip-url" placeholder="…hoặc dán link ảnh (https://…)"><div class="row2"><button class="btn green sm" id="ip-use">Dùng link này</button><button class="btn ghost sm" id="ip-close">Đóng</button></div></div>`;
+  document.body.appendChild(d);
+  const pick = im => { pinImage(w, im); onPick(im); d.remove(); toast('Đã chọn ảnh này cho từ “' + w.word + '”'); };
+  const search = async () => {
+    const g = $('#ip-grid', d); g.innerHTML = '<p class="muted">Đang tìm…</p>';
+    const list = (await searchImages($('#ip-q', d).value.trim() || w.word)).slice(0, 18);
+    g.innerHTML = list.length ? list.map((im, i) => `<button class="gi" data-i="${i}"><img src="${esc(im.src)}" alt="" referrerpolicy="no-referrer" loading="lazy"></button>`).join('') : '<p class="muted">Không tìm thấy ảnh. Thử từ khóa khác (hoặc thêm khóa Pixabay ở Cài đặt để có nhiều ảnh đẹp hơn).</p>';
+    $$('.gi', g).forEach(b => b.onclick = () => pick(list[+b.dataset.i]));
+  };
+  $('#ip-go', d).onclick = search; $('#ip-q', d).onkeydown = e => { if (e.key === 'Enter') search(); };
+  $('#ip-use', d).onclick = () => { const u = $('#ip-url', d).value.trim(); if (/^https?:\/\//.test(u)) pick({ src: u, credit: 'Ảnh của bạn', link: '' }); else toast('Link ảnh phải bắt đầu bằng https://'); };
+  $('#ip-close', d).onclick = () => d.remove();
+  search();
+}
+
 /* ---------- Xem chi tiết 1 từ ---------- */
 async function openDetail(key) {
   const entry = Vocab.entries.find(e => e.key === key); if (!entry) return;
@@ -222,9 +306,7 @@ async function openDetail(key) {
 $('#modal-x').onclick = () => { $('#modal').hidden = true; $('#modal-body').innerHTML = ''; };
 $('#modal').onclick = e => { if (e.target.id === 'modal') $('#modal-x').click(); };
 
-/* ============ BÀI HỌC ============ */
-let L = null;
-
+/* ============ BÀI HỌC TỪ VỰNG ============ */
 function planSession(mode) {
   const now = Date.now(), P = Store.progress;
   const list = Vocab.entries.filter(e => topicFilter === 'all' || e.topic === topicFilter);
@@ -237,15 +319,12 @@ function planSession(mode) {
     if (rev.length < nRev) nw = fresh.slice(0, Math.min(fresh.length, nNew + nRev - rev.length));
     if (nw.length < nNew) rev = due.slice(0, Math.min(due.length, nRev + nNew - nw.length));
   }
-  let practice = false;
-  if (!nw.length && !rev.length) {          // hết từ đến hạn -> luyện thêm các từ đã học
-    rev = shuffle(list.filter(e => P[e.key])).slice(0, 8); practice = rev.length > 0;
-  }
-  return { nw, rev, practice };
+  if (!nw.length && !rev.length) rev = shuffle(list.filter(e => P[e.key])).slice(0, 8);   // hết từ đến hạn -> luyện thêm
+  return { nw, rev };
 }
 
 async function startLesson(mode) {
-  const { nw, rev, practice } = planSession(mode);
+  const { nw, rev } = planSession(mode);
   if (!nw.length && !rev.length) return toast(mode === 'review' ? 'Chưa có từ nào để ôn – hãy học từ mới trước!' : 'Không còn từ nào trong chủ đề này.');
   const root = $('#lesson'); root.hidden = false; document.body.classList.add('noscroll');
   root.innerHTML = `<div class="prep"><div class="spinner"></div><h3>Đang chuẩn bị bài học…</h3><p id="prepmsg" class="muted">Tìm ảnh, phát âm, câu mẫu cho ${nw.length + rev.length} từ</p></div>`;
@@ -257,159 +336,17 @@ async function startLesson(mode) {
     viPool: Vocab.entries.map(e => ({ key: e.key, vi: byKey[e.key]?.vi || e.vi || cachedVi(e.key) }))
   };
   const items = [...nw.map(e => ({ w: byKey[e.key], box: 0, isNew: true })), ...rev.map(e => ({ w: byKey[e.key], box: Store.progress[e.key]?.box || 0, isNew: false }))];
-  const queue = buildQueue(items, ctx);
-  L = { queue, i: 0, hearts: 5, xp: 0, done: 0, ok: 0, tries: 0, res: {}, ctx, words: items.map(x => x.w), practice, mode };
-  window.__imgFail = () => { if (cur()?.type === 'image') { L.queue.splice(L.i, 1); toast('Ảnh không tải được – chuyển câu khác'); step(); } };
-  step();
+  root.hidden = true; document.body.classList.remove('noscroll');
+  runLesson({ queue: buildQueue(items, ctx), words: items.map(x => x.w), ctx, kind: 'vocab', mode, redo: startLesson });
 }
-
-const cur = () => L?.queue[L.i];
-
-function step() {
-  const ex = cur();
-  if (!ex) return finishLesson(false);
-  L.answered = false; L.sel = null;
-  const left = L.queue.length - L.i, pct = Math.round(L.done / (L.done + left) * 100);
-  const root = $('#lesson');
-  root.innerHTML = `
-  <div class="lhead"><button class="x" id="lq" aria-label="Thoát">✕</button><div class="pbar"><i style="width:${pct}%"></i></div><div class="hearts">❤️ ${L.hearts}</div></div>
-  <div class="lbody" id="lb"></div>
-  <footer class="lfoot" id="lf"><div class="fb" id="fb"></div><div class="fbtns"><button class="btn ghost" id="lskip" hidden></button><button class="btn green" id="lcheck" disabled>KIỂM TRA</button></div></footer>`;
-  $('#lq').onclick = () => { if (confirm('Thoát bài học? Tiến độ bài này sẽ không được lưu.')) closeLesson(); };
-  const body = $('#lb'), check = $('#lcheck'), skip = $('#lskip');
-  const w = ex.w;
-  const sayHandler = e => {
-    const b = e.target.closest('[data-act]'); if (!b) return;
-    if (b.dataset.act === 'say') pronounce(w); else if (b.dataset.act === 'slow') pronounce(w, Store.profile.accent, true);
-  };
-
-  if (ex.kind === 'teach') {
-    body.innerHTML = `<h3 class="ltitle">✨ Từ mới</h3>${wordCardHTML(w)}`;
-    bindWordCard(body, w);
-    check.textContent = 'TIẾP TỤC'; check.disabled = false;
-    check.onclick = () => { L.i++; L.done++; step(); };
-    setTimeout(() => pronounce(w), 300);
-    return;
-  }
-
-  if (ex.kind === 'choice') {
-    body.innerHTML = `<h3 class="ltitle">${esc(ex.title)}</h3><div class="prompt">${ex.promptHTML}</div>
-      <div class="opts">${ex.options.map((o, i) => `<button class="opt" data-i="${i}"><kbd>${i + 1}</kbd><span>${esc(o.text)}</span></button>`).join('')}</div>`;
-    body.addEventListener('click', sayHandler);
-    $$('.opt', body).forEach(b => b.onclick = () => { if (L.answered) return; L.sel = +b.dataset.i; $$('.opt', body).forEach(x => x.classList.toggle('sel', x === b)); check.disabled = false; });
-    check.onclick = () => {
-      if (L.answered) return next();
-      const o = ex.options[L.sel];
-      $$('.opt', body).forEach((b, i) => { if (ex.options[i].correct) b.classList.add('right'); else if (i === L.sel) b.classList.add('wrong'); b.disabled = true; });
-      settle(o.correct);
-    };
-  } else if (ex.kind === 'type') {
-    body.innerHTML = `<h3 class="ltitle">${esc(ex.title)}</h3><div class="prompt">${ex.promptHTML}</div>
-      <input id="tin" class="tin" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Gõ đáp án bằng tiếng Anh…">`;
-    const inp = $('#tin'); setTimeout(() => inp.focus(), 50);
-    inp.oninput = () => { check.disabled = !inp.value.trim(); };
-    inp.onkeydown = e => { if (e.key === 'Enter' && !check.disabled) check.click(); };
-    skip.hidden = false; skip.textContent = 'TÔI KHÔNG BIẾT';
-    skip.onclick = () => { inp.disabled = true; settle(false); };
-    check.onclick = () => {
-      if (L.answered) return next();
-      const v = norm(inp.value); inp.disabled = true;
-      const exact = ex.answers.includes(v);
-      const near = !exact && v.length >= 6 && ex.answers.some(a => lev(a, v) === 1);
-      settle(exact || near, near ? `Gần đúng! Chính tả đúng là: ${ex.reveal}` : '');
-    };
-  } else if (ex.kind === 'speak') {
-    body.innerHTML = `<h3 class="ltitle">${esc(ex.title)}</h3><div class="prompt">${ex.promptHTML}</div>
-      <div class="qlisten"><button class="chip" data-act="say">🔊 Nghe mẫu</button><button class="micbtn" id="micbtn">🎤</button></div><p class="muted center" id="micmsg">Nhấn micro rồi đọc to từ trên</p>`;
-    body.addEventListener('click', sayHandler);
-    skip.hidden = false; skip.textContent = 'KHÔNG NÓI ĐƯỢC LÚC NÀY';
-    skip.onclick = () => { L.queue.splice(L.i, 1); step(); };
-    $('#micbtn').onclick = async () => {
-      if (L.answered) return; $('#micmsg').textContent = '🎙️ Đang nghe…';
-      try {
-        const alts = await listenOnce(); const ok = alts.some(a => a.includes(w.key));
-        if (!alts.length) { $('#micmsg').textContent = 'Không nghe thấy gì, thử lại nhé.'; return; }
-        settle(ok, ok ? '' : `Nghe được: “${alts[0]}”`);
-      } catch { toast('Không dùng được micro – bỏ qua câu này'); L.queue.splice(L.i, 1); step(); }
-    };
-    check.textContent = 'TIẾP TỤC'; check.disabled = true;
-    check.onclick = () => next();
-  }
-  if (ex.auto) setTimeout(() => { if (cur() === ex) pronounce(w); }, 250);
-}
-
-function settle(ok, note = '') {
-  const ex = cur(), w = ex.w; L.answered = true;
-  const r = L.res[w.key] ||= { bad: false };
-  beep(ok);
-  if (!ex.retry) { L.tries++; if (ok) { L.ok++; L.xp += 10; } }
-  if (!ok) {
-    r.bad = true; L.hearts--;
-    if (L.hearts > 0) { const again = makeFor(w, 0, L.ctx, [ex.type]); if (again) { again.retry = true; L.queue.push(again); } }
-  }
-  const fb = $('#fb'), lf = $('#lf'), check = $('#lcheck');
-  lf.className = 'lfoot ' + (ok ? 'ok' : 'bad');
-  fb.innerHTML = ok
-    ? `<b>✅ Chính xác! ${note ? '' : '+10 XP'}</b>${note ? `<div>${esc(note)}</div>` : ''}<div class="fbw">${esc(w.word)} ${esc(w.phonetic || '')} – ${esc(w.vi || '')} <button class="mini" id="fbsay">🔊</button></div>`
-    : `<b>❌ Đáp án đúng: ${esc(ex.reveal)}</b>${note ? `<div>${esc(note)}</div>` : ''}<div class="fbw">${esc(w.word)} ${esc(w.phonetic || '')} – ${esc(w.vi || '')} <button class="mini" id="fbsay">🔊</button></div>`;
-  $('#fbsay').onclick = () => pronounce(w);
-  $('#lskip').hidden = true;
-  $('#lb').querySelectorAll('input').forEach(i => i.disabled = true);
-  check.disabled = false; check.textContent = L.hearts <= 0 ? 'KẾT THÚC' : 'TIẾP TỤC';
-  check.className = 'btn ' + (ok ? 'green' : 'red');
-  check.onclick = next;
-  check.focus();
-}
-
-function next() {
-  if (!L.answered) return;
-  L.i++; L.done++;
-  if (L.hearts <= 0) return finishLesson(true);
-  step();
-}
-
-function finishLesson(failed) {
-  const p = Store.profile, today = todayStr();
-  const perfect = !failed && Object.values(L.res).every(r => !r.bad);
-  const bonus = perfect ? 10 : 0, gained = L.xp + bonus;
-  for (const [key, r] of Object.entries(L.res)) applyResult(key, r.bad);
-  if (gained > 0) {
-    p.xp += gained; p.xpByDay[today] = (p.xpByDay[today] || 0) + gained;
-    if (p.lastDay !== today) { p.streak = p.lastDay === todayStr(new Date(Date.now() - DAY)) ? p.streak + 1 : 1; p.lastDay = today; }
-    p.lessons++;
-    Object.keys(p.xpByDay).sort().slice(0, -60).forEach(k => delete p.xpByDay[k]);
-  }
-  Store.save();
-  const acc = L.tries ? Math.round(L.ok / L.tries * 100) : 0;
-  const good = L.words.filter(w => !L.res[w.key]?.bad), weak = L.words.filter(w => L.res[w.key]?.bad);
-  $('#lesson').innerHTML = `<div class="done">
-    <div class="trophy">${failed ? '💔' : perfect ? '🏆' : '🎉'}</div>
-    <h2>${failed ? 'Hết tim rồi – đừng nản nhé!' : perfect ? 'Hoàn hảo!' : 'Hoàn thành bài học!'}</h2>
-    <div class="sum"><div class="card"><b>+${gained}</b><span>XP</span></div><div class="card"><b>${acc}%</b><span>Chính xác</span></div><div class="card"><b>🔥 ${p.streak}</b><span>Chuỗi ngày</span></div></div>
-    ${good.length ? `<p class="gl">✅ Nhớ tốt: ${good.map(w => esc(w.word)).join(', ')}</p>` : ''}
-    ${weak.length ? `<p class="gl">🔁 Cần ôn lại sớm: ${weak.map(w => esc(w.word)).join(', ')}</p>` : ''}
-    <button class="btn green big" id="again">TIẾP TỤC HỌC</button><button class="btn ghost" id="home">VỀ TRANG CHỦ</button></div>`;
-  $('#again').onclick = () => { const m = L.mode; closeLesson(); startLesson(m); };
-  $('#home').onclick = closeLesson;
-}
-
-function closeLesson() {
-  $('#lesson').hidden = true; $('#lesson').innerHTML = ''; document.body.classList.remove('noscroll');
-  L = null; window.__imgFail = null; renderAll();
-}
-
-document.addEventListener('keydown', e => {
-  if (!L || $('#lesson').hidden || e.target.tagName === 'INPUT') return;
-  const ex = cur();
-  if (e.key === 'Enter') { const c = $('#lcheck'); if (c && !c.disabled) c.click(); }
-  else if (ex?.kind === 'choice' && !L.answered && /^[1-4]$/.test(e.key)) $$('.opt')[+e.key - 1]?.click();
-});
 
 /* ===== Khởi động ===== */
 $$('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.tab; renderAll(); scrollTo(0, 0); });
+function go(t) { tab = t; renderAll(); scrollTo(0, 0); }
 (async () => {
   $('#view').innerHTML = '<p class="loading">⏳ Đang tải danh sách từ vựng…</p>';
   await loadVocab();
   renderAll();
+  if (Sync.cfg()) syncNow();
   if (!Vocab.entries.length) toast('Chưa có từ nào. Hãy mở app qua máy chủ web hoặc dùng "Tải file lên" ở tab Cài đặt.');
 })();
