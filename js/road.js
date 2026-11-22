@@ -117,6 +117,57 @@ function evalLog(log) {
   return by;
 }
 
+
+/* ===== Lớp giao diện du lịch: chỉ đổi cách hiển thị, không đổi nội dung hay điều kiện mở khóa ===== */
+const TRAVEL = [
+  { city: 'Dublin', country: 'Ireland', flag: '🇮🇪', transport: '✈️ Bay đến Dublin',
+    fact: 'Guinness Storehouse ở Dublin là bảo tàng về bia Guinness, có quầy bar trên tầng cao nhìn toàn cảnh thành phố.' },
+  { city: 'London', country: 'United Kingdom', flag: '🇬🇧', transport: '🚆 Đi tàu tới London',
+    fact: 'Tàu điện ngầm London (London Underground) khai trương năm 1863, là hệ thống tàu điện ngầm lâu đời nhất thế giới.' },
+  { city: 'New York', country: 'United States', flag: '🇺🇸', transport: '✈️ Bay đến New York',
+    fact: 'Tượng Nữ thần Tự do là món quà của nhân dân Pháp tặng nước Mỹ, được khánh thành năm 1886.' },
+  { city: 'Sydney', country: 'Australia', flag: '🇦🇺', transport: '✈️ Bay đến Sydney',
+    fact: 'Nhà hát Opera Sydney khánh thành năm 1973, do kiến trúc sư Jørn Utzon thiết kế.' },
+  { city: 'Wellington', country: 'New Zealand', flag: '🇳🇿', transport: '✈️ Bay đến Wellington',
+    fact: 'Wellington thường được gọi là thủ đô cực nam của thế giới trong số các thủ đô quốc gia.' }
+];
+
+/* Chú chim du lịch "Pipo" – vẽ bằng SVG, cánh vỗ bằng CSS */
+function pipoSVG(big = false) {
+  return `<svg class="pipo ${big ? 'big' : ''}" viewBox="0 0 120 100" aria-label="Pipo" role="img">
+    <path class="wing" d="M34 58 Q12 40 22 24 Q40 36 50 56 Z" fill="#29b6f6"/>
+    <ellipse cx="60" cy="60" rx="34" ry="28" fill="#4fc3f7"/>
+    <circle cx="60" cy="38" r="24" fill="#4fc3f7"/>
+    <circle cx="52" cy="34" r="6" fill="#fff"/><circle cx="53" cy="35" r="3" fill="#222"/>
+    <circle cx="68" cy="34" r="6" fill="#fff"/><circle cx="69" cy="35" r="3" fill="#222"/>
+    <circle cx="46" cy="45" r="4" fill="#ff8fa3" opacity=".7"/><circle cx="74" cy="45" r="4" fill="#ff8fa3" opacity=".7"/>
+    <polygon points="56,42 64,42 60,50" fill="#ffa000"/>
+    <path d="M36 68 Q60 78 84 68 L80 76 Q60 84 40 76 Z" fill="#ef5350"/>
+    <path d="M80 70 Q94 66 92 80 Q86 76 80 76 Z" fill="#ef5350"/>
+    <ellipse cx="48" cy="90" rx="6" ry="3" fill="#ffb300"/><ellipse cx="72" cy="90" rx="6" ry="3" fill="#ffb300"/>
+  </svg>`;
+}
+
+function pipoMessage(cur) {
+  const left = cur ? NODES.filter(n => n.type !== 'M' && n.stage === cur.stage && !nodeDone(n)).length : 0;
+  if (!cur) return 'Tuyệt vời! Chúng ta đã đi hết hành trình rồi! 🎉';
+  const t = TRAVEL[cur.stage - 1];
+  return stageUnlocked(cur.stage) && cur.stage > 1 && left === stageNodeCount(cur.stage)
+    ? `Chào mừng đến ${t.city}! Cùng khám phá nhé ✈️`
+    : `Còn ${left} bài nữa là bay tới chặng sau! 🧳`;
+}
+const stageNodeCount = s => STAGES[s - 1].nodes.filter(id => id[0] !== 'M').length;
+
+function routeHTML(cur) {
+  const at = cur ? cur.stage : 0;
+  return `<div class="route">${TRAVEL.map((t, i) => {
+    const sid = i + 1, done = stageCleared(sid), open = stageUnlocked(sid), here = sid === at;
+    return `<div class="rstop ${done ? 'done' : ''} ${open ? '' : 'lock'}">
+      <div class="rdot">${here ? pipoSVG(false) : done ? '✅' : open ? t.flag : '🔒'}</div>
+      <small>${esc(t.city)}</small></div>`;
+  }).join('<div class="rline"></div>')}</div>`;
+}
+
 /* ================= BẢN ĐỒ ================= */
 function estBand() {
   let b = 'dưới 4.5';
@@ -132,7 +183,9 @@ function viewRoad() {
   const lastCheck = r.checks?.[r.checks.length - 1];
   $('#view').innerHTML = `
   <section class="card roadhead">
-    <div><h2>🗺️ Lộ trình IELTS 6.5</h2><p class="muted">5 chặng từ dễ đến khó · mỗi chặng mở khóa khi hoàn thành chặng trước.</p></div>
+    <div class="mascotrow">${pipoSVG(true)}<div class="bubble">${esc(pipoMessage(cur))}</div></div>
+    ${routeHTML(cur)}
+    <div><h2>🗺️ Hành trình IELTS 6.5</h2><p class="muted">5 thành phố nói tiếng Anh · mỗi chặng mở khóa khi hoàn thành chặng trước.</p></div>
     <div class="pbar"><i style="width:${Math.round(dc / total * 100)}%"></i></div>
     <p><b>${dc}/${total}</b> bài hoàn thành · Trình độ ước tính: <b>${estBand()}</b>${cur ? ` · Tiếp theo: <b>${esc(nodeTitle(cur))}</b>` : ' · 🎉 Đã hoàn thành lộ trình!'}</p>
     ${cur ? `<button class="btn green big" id="rd-next">▶ HỌC TIẾP: ${esc(nodeTitle(cur)).toUpperCase()}</button>` : ''}
@@ -163,9 +216,10 @@ function stageHTML(st) {
   const ul = stageUnlocked(st.id), nodes = st.nodes.map(nodeById), d = nodes.filter(n => n.type !== 'M' && nodeDone(n)).length, tot = nodes.filter(n => n.type !== 'M').length;
   const cur = currentNode();
   return `<section class="stage ${ul ? '' : 'locked'}" style="--c:${st.color}">
-    <div class="stagehead"><div class="se">${st.emoji}</div><div class="grow"><b>Chặng ${st.id} · ${esc(st.name)}</b><div class="muted">Mục tiêu band ${st.band} · ${d}/${tot} bài</div></div>
+    <div class="stagehead"><div class="se">${TRAVEL[st.id - 1].flag}</div><div class="grow"><b>${esc(TRAVEL[st.id - 1].city)}, ${esc(TRAVEL[st.id - 1].country)}</b><div class="muted">${esc(TRAVEL[st.id - 1].transport)} · Chặng ${st.id} · ${esc(st.name)} · band ${st.band} · ${d}/${tot} bài</div></div>
       ${stageCleared(st.id) ? '<span class="tag g">✓ Xong</span>' : `<button class="chip sm" data-jump="${st.id}">⚡ Vượt chặng</button>`}</div>
     <p class="muted stdesc">${esc(st.desc)}</p>
+    ${stageCleared(st.id) ? `<div class="fact">🌟 Sự thật thú vị về ${esc(TRAVEL[st.id - 1].city)}: ${esc(TRAVEL[st.id - 1].fact)}</div>` : ''}
     <div class="path">${nodes.map((n, i) => {
       const done = nodeDone(n), open = nodeUnlocked(n), s = nst(n.id), isCur = cur && cur.id === n.id;
       const cls = ['node', n.type === 'B' ? 'boss' : '', done ? 'done' : '', open ? '' : 'lock', s.weak ? 'weak' : '', isCur ? 'cur' : '', s.skipped ? 'skip' : ''].join(' ');

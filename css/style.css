@@ -214,3 +214,22 @@ button.pill{border:0;cursor:pointer;font:inherit;font-weight:800}
 .startbub{position:absolute;top:-30px;background:var(--bg);border:2px solid var(--line);color:var(--c);font-weight:900;font-size:12px;padding:3px 10px;border-radius:10px;animation:bn 1.2s ease infinite;z-index:1}
 .res{padding:8px 0;border-bottom:1px dashed var(--line)}.res a{color:var(--blue)}
 .theory p,.theory li{font-size:16.5px;line-height:1.65}.theory h2{margin-bottom:10px}
+
+/* ===== Lớp du lịch ===== */
+.mascotrow{display:flex;align-items:center;gap:12px}
+.pipo{width:64px;height:54px;flex:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.12));animation:bob 2.4s ease-in-out infinite}
+.pipo.big{width:96px;height:80px}
+.pipo .wing{transform-origin:40px 58px;animation:flap .5s ease-in-out infinite alternate}
+@keyframes flap{to{transform:rotate(-22deg)}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.mascotrow .bubble{position:relative;background:var(--soft);border-radius:16px;padding:10px 14px;font-weight:800;flex:1}
+.mascotrow .bubble:before{content:"";position:absolute;left:-8px;top:50%;margin-top:-6px;border:6px solid transparent;border-right-color:var(--soft);border-left:0}
+.route{display:flex;align-items:center;overflow-x:auto;padding:10px 2px 6px;margin:6px 0}
+.rstop{display:flex;flex-direction:column;align-items:center;min-width:66px;text-align:center}
+.rstop small{font-weight:800;font-size:11px;margin-top:4px}
+.rdot{width:44px;height:44px;border-radius:50%;background:var(--card);border:3px solid var(--line);display:grid;place-items:center;font-size:22px}
+.rstop.done .rdot{border-color:var(--green);background:var(--okbg)}
+.rstop.lock{opacity:.55}
+.rstop:not(.lock) .rdot .pipo{width:40px;height:34px}
+.rline{flex:1;min-width:14px;height:0;border-top:3px dashed var(--line);margin-bottom:22px}
+.fact{background:rgba(255,200,0,.12);border:2px dashed var(--yellow);border-radius:14px;padding:10px 12px;margin:10px 0;font-weight:700;font-size:.95em}
