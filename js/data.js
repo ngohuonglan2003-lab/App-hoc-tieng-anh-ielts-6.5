@@ -180,6 +180,13 @@ async function fetchEnrichment(word) {
   return { ok: !!(dict || images.length || tr), phonetic, audio, meanings, examples, synonyms, antonyms, collocations, vi, images };
 }
 
+/* Ảnh bạn đã chọn: link ngoài hoặc ảnh lưu trong máy (idb:) */
+function pinnedImage(key) {
+  const pk = LS.get('ielts.imgpick', {})[key]; if (!pk) return [];
+  if (String(pk.src).startsWith('idb:')) { const u = typeof Imgs !== 'undefined' ? Imgs.url(key) : ''; return u ? [{ src: u, credit: pk.credit || 'Ảnh của bạn', link: '', pinned: true, local: true }] : []; }
+  return [{ ...pk, pinned: true }];
+}
+
 /* Gộp dữ liệu người dùng (file) + dữ liệu tự động. Dữ liệu người dùng luôn được ưu tiên. */
 function merge(entry, d) {
   const examples = [...(entry.example ? [{ en: entry.example, vi: '' }] : []), ...(d.examples || [])];
@@ -190,13 +197,13 @@ function merge(entry, d) {
     audio: d.audio || { us: '', uk: '', any: '' },
     meanings: d.meanings || [], synonyms: d.synonyms || [], antonyms: d.antonyms || [], collocations: d.collocations || [],
     examples: examples.filter(e => e.en && !seen.has(e.en) && seen.add(e.en)),
-    images: [...(LS.get('ielts.imgpick', {})[entry.key] ? [{ ...LS.get('ielts.imgpick', {})[entry.key], pinned: true }] : []),
+    images: [...pinnedImage(entry.key),
       ...(entry.image ? [{ src: entry.image, credit: '', link: '', pinned: true }] : []), ...(d.images || [])]
   };
 }
 
 async function enrich(entry) {
-  const mk = entry.key + '|' + entry.vi + '|' + entry.example + '|' + entry.image + '|' + (LS.get('ielts.imgpick', {})[entry.key]?.src || '');
+  const mk = entry.key + '|' + entry.vi + '|' + entry.example + '|' + entry.image + '|' + (LS.get('ielts.imgpick', {})[entry.key]?.src || '') + '|' + (typeof Imgs !== 'undefined' ? Imgs.ver : 0);
   if (MEM.has(mk)) return MEM.get(mk);
   let d = cache[entry.key];
   if (!d) {
@@ -226,22 +233,16 @@ async function translateVi(text) {
   return (trMem[text] = t && !/MYMEMORY/i.test(t) ? t : '');
 }
 
-/* ===== Phát âm ===== */
+/* ===== Phát âm (xem js/media.js để chọn giọng tốt) ===== */
 let curAudio;
-function speak(text, { lang = 'en-US', rate = .9 } = {}) {
-  if (!('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = rate;
-  const v = speechSynthesis.getVoices().find(v => v.lang.replace('_', '-') === lang);
-  if (v) u.voice = v;
-  speechSynthesis.speak(u);
-}
+function speak(text, { lang = 'en-US', rate } = {}) { Voice.say(text, { lang, rate }); }
 function pronounce(w, accent = Store.profile.accent, slow = false) {
-  if (curAudio) curAudio.pause();
-  const url = slow ? '' : (w.audio?.[accent] || (accent === 'us' ? w.audio?.any : '') || '');
-  const tts = () => speak(w.word, { lang: accent === 'uk' ? 'en-GB' : 'en-US', rate: slow ? .55 : .9 });
+  const c = Voice.cfg();
+  Voice.stop();
+  const url = (slow || c.wordSrc === 'tts') ? '' : (w.audio?.[accent] || (accent === 'us' ? w.audio?.any : '') || '');
+  const tts = () => Voice.say(w.word, { lang: accent === 'uk' ? 'en-GB' : 'en-US', rate: slow ? .6 : undefined });
   if (!url) return tts();
-  curAudio = new Audio(url); curAudio.play().catch(tts);
+  Voice.playUrl(url).catch(tts);
 }
 let AC;
 function beep(ok) {

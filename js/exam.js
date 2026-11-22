@@ -146,17 +146,15 @@ function showResults({ skill, title, sections, res, total, topic, source }) {
 
 /* ---------- Giọng đọc nhiều người cho Listening ---------- */
 function speakSeq(lines, { onLine, onEnd } = {}) {
-  const synth = window.speechSynthesis; synth.cancel();
-  const voices = synth.getVoices().filter(v => /^en/i.test(v.lang)), speakers = [...new Set(lines.map(l => l.speaker))];
-  let i = 0, stopped = false;
-  const next = () => {
+  Voice.stop();
+  const speakers = [...new Set(lines.map(l => l.speaker))]; let i = 0, stopped = false;
+  const next = async () => {
     if (stopped) return; if (i >= lines.length) return onEnd?.();
-    const l = lines[i++], u = new SpeechSynthesisUtterance(l.text), si = speakers.indexOf(l.speaker);
-    u.lang = 'en-GB'; const v = voices.length ? voices[(si * 2) % voices.length] : null; if (v) { u.voice = v; u.lang = v.lang; }
-    u.pitch = si % 2 ? 1.2 : .9; u.rate = .95; u.onend = () => setTimeout(next, 400); u.onerror = () => setTimeout(next, 0);
-    onLine?.(i, lines.length); synth.speak(u);
+    const l = lines[i++]; onLine?.(i, lines.length);
+    try { await Voice.line(l.text, { lang: 'en-GB', idx: speakers.indexOf(l.speaker) % 2 }); } catch { }
+    if (!stopped) setTimeout(next, 400);
   };
-  next(); return { stop() { stopped = true; synth.cancel(); } };
+  next(); return { stop() { stopped = true; Voice.stop(); } };
 }
 
 /* ---------- Tạo đề bằng AI (có kiểm tra cấu trúc) ---------- */

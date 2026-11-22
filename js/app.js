@@ -122,6 +122,11 @@ function viewSettings() {
     <div class="row2"><button class="btn blue" id="ai-save">Lưu & kiểm tra</button><button class="btn ghost" id="ai-clear">Xóa key</button></div>
     <p class="muted" id="ai-msg">${AI.has() ? '✅ Đã bật AI.' : 'Chưa bật – app vẫn dùng đề có sẵn và chấm ước lượng.'}</p>
   </section>
+  <section class="card" id="voicecard">
+    <h2>🔊 Giọng đọc tiếng Anh</h2>
+    <p>Giọng nghe “dở” thường do thiết bị đang dùng giọng máy mặc định. App đã tự chọn giọng tốt nhất đang có; bạn có thể đổi bên dưới và bấm Nghe thử.</p>
+    ${voiceSettingsHTML()}
+  </section>
   <section class="card">
     <h2>🖼️ Ảnh minh họa đẹp hơn (tùy chọn)</h2>
     <p>Ảnh tự động đôi khi không sát nghĩa với từ trừu tượng. Bạn luôn có thể bấm <b>🔎 Tìm ảnh</b> ở thẻ từ để chọn ảnh khác. Thêm key Pixabay (miễn phí, pixabay.com/api/docs) để có nhiều ảnh đẹp, chuyên nghiệp hơn.</p>
@@ -166,6 +171,7 @@ function viewSettings() {
   $('#accent').onchange = e => { p.accent = e.target.value; Store.save(); };
   $('#sound').onchange = e => { p.sound = e.target.value === '1'; Store.save(); };
   $('#clrcache').onclick = () => { clearCache(); toast('Đã xóa bộ nhớ đệm'); };
+  bindVoiceSettings();
   $('#ai-save').onclick = async () => {
     const key = $('#ai-key').value.trim(), m = $('#ai-msg'); AI.save({ key, model: $('#ai-model').value });
     if (!key) { m.textContent = 'Đã tắt AI.'; return; }
@@ -189,6 +195,49 @@ function viewSettings() {
     if (!confirm('Xóa toàn bộ tiến độ, XP và chuỗi ngày học?')) return;
     LS.del('ielts.progress'); LS.del('ielts.profile'); location.reload();
   };
+}
+
+/* ---------- Cài đặt giọng đọc ---------- */
+function voiceSettingsHTML() {
+  const c = Voice.cfg(), vs = Voice.voices();
+  const opt = (lang, cur) => { const r = Voice.ranked(lang);
+    return `<option value="">Tự động chọn giọng tốt nhất${r[0] ? ' (hiện tại: ' + esc(r[0].name) + ')' : ''}</option>` + r.map(v => `<option value="${esc(v.name)}" ${cur === v.name ? 'selected' : ''}>${esc(v.name)} · ${esc(v.lang)}${Voice.score(v, lang) >= 100 ? ' ⭐' : ''}</option>`).join(''); };
+  const best = Voice.ranked('en-US')[0];
+  const weak = !best || Voice.score(best, 'en-US') < 50;
+  return `
+  ${vs.length ? '' : '<p class="bad">⚠️ Chưa thấy giọng tiếng Anh nào trên thiết bị/trình duyệt này.</p>'}
+  ${weak ? `<div class="card warnc"><b>Máy bạn chưa có giọng tự nhiên.</b> Cách cải thiện (miễn phí):<ul>
+    <li><b>iPhone/iPad:</b> Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói → Tiếng Anh → tải giọng <i>Enhanced</i> hoặc <i>Premium</i> (vd: Ava, Samantha, Daniel).</li>
+    <li><b>Windows/Mac/Android:</b> dùng trình duyệt <b>Microsoft Edge</b> – có sẵn giọng “Natural/Online” rất tự nhiên (Aria, Jenny, Guy, Sonia…). Chrome có giọng “Google US English”.</li>
+    <li>Hoặc dùng giọng AI tự nhiên ở bên dưới.</li></ul></div>` : ''}
+  <label class="field">Giọng Mỹ (US)<select id="vo-us">${opt('en-US', c.us)}</select></label><button class="btn ghost sm" id="vo-t-us">▶ Nghe thử giọng Mỹ</button>
+  <label class="field">Giọng Anh (UK)<select id="vo-uk">${opt('en-GB', c.uk)}</select></label><button class="btn ghost sm" id="vo-t-uk">▶ Nghe thử giọng Anh</button>
+  <label class="field">Tốc độ đọc<input id="vo-rate" type="range" min=".7" max="1.1" step=".05" value="${c.rate}"></label>
+  <label class="field">Phát âm từ đơn<select id="vo-src"><option value="human" ${c.wordSrc === 'human' ? 'selected' : ''}>Ưu tiên giọng người thật của từ điển</option><option value="tts" ${c.wordSrc === 'tts' ? 'selected' : ''}>Luôn dùng giọng đã chọn ở trên (đều giọng)</option></select></label>
+  <h3>Giọng AI tự nhiên (tùy chọn)</h3>
+  <p class="muted">Dùng ElevenLabs (elevenlabs.io): giọng rất tự nhiên cho cả từ và câu. Có gói miễn phí giới hạn số ký tự mỗi tháng. Mỗi câu chỉ tính phí lần đầu, sau đó được lưu trong máy. Key chỉ lưu trên thiết bị này. Nếu lỗi, app tự quay lại giọng trình duyệt.</p>
+  <label class="field">Dùng giọng<select id="vo-eng"><option value="browser" ${c.engine !== 'eleven' ? 'selected' : ''}>Giọng của thiết bị/trình duyệt</option><option value="eleven" ${c.engine === 'eleven' ? 'selected' : ''}>Giọng AI ElevenLabs</option></select></label>
+  <input id="vo-ekey" type="password" autocomplete="off" placeholder="ElevenLabs API key" value="${esc(c.eleven.key)}">
+  <div class="row2"><input id="vo-eus" placeholder="Voice ID giọng Mỹ" value="${esc(c.eleven.us)}"><input id="vo-euk" placeholder="Voice ID giọng Anh" value="${esc(c.eleven.uk)}"></div>
+  <button class="btn blue sm" id="vo-t-el">▶ Nghe thử giọng AI</button>`;
+}
+function bindVoiceSettings() {
+  if (!$('#vo-us')) return;
+  const save = () => {
+    const c = Voice.cfg();
+    Voice.save({ ...c, us: $('#vo-us').value, uk: $('#vo-uk').value, rate: +$('#vo-rate').value, wordSrc: $('#vo-src').value, engine: $('#vo-eng').value,
+      eleven: { key: $('#vo-ekey').value.trim(), us: $('#vo-eus').value.trim() || c.eleven.us, uk: $('#vo-euk').value.trim() || c.eleven.uk } });
+  };
+  $$('#voicecard select, #voicecard input').forEach(el => el.onchange = save);
+  const demo = 'Governments must act now to mitigate the effects of climate change.';
+  $('#vo-t-us').onclick = () => { save(); const c = Voice.cfg(); Voice.stop(); Voice.browserLine(demo, 'en-US', c.rate); };
+  $('#vo-t-uk').onclick = () => { save(); const c = Voice.cfg(); Voice.stop(); Voice.browserLine(demo, 'en-GB', c.rate); };
+  $('#vo-t-el').onclick = async () => {
+    save(); const c = Voice.cfg(); if (!c.eleven.key) return toast('Hãy nhập ElevenLabs API key trước.');
+    try { toast('Đang tạo giọng AI…'); Voice.stop(); await Voice.playBlob(await Voice.elevenBlob(demo, c.eleven.us)); }
+    catch (e) { toast('Giọng AI lỗi: ' + e.message); }
+  };
+  if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { if (tab === 'settings' && $('#voicecard')) { $('#voicecard').innerHTML = '<h2>🔊 Giọng đọc tiếng Anh</h2>' + voiceSettingsHTML(); bindVoiceSettings(); } };
 }
 
 function renderAll() {
@@ -273,7 +322,7 @@ function bindWordCard(root, w) {
 
 /* ---------- Chọn ảnh minh họa cho 1 từ ---------- */
 function pinImage(w, im) {
-  const pk = LS.get('ielts.imgpick', {}); pk[w.key] = { src: im.src, credit: im.credit || '', link: im.link || '' };
+  const pk = LS.get('ielts.imgpick', {}); pk[w.key] = { src: im.local ? 'idb:' + w.key : im.src, credit: im.credit || '', link: im.link || '' };
   LS.set('ielts.imgpick', pk); window.onStoreSave?.();
   w.images = [{ ...pk[w.key], pinned: true }, ...(w.images || []).filter(i => i.src !== im.src && !i.pinned)];
 }
@@ -283,18 +332,43 @@ function openImagePicker(w, onPick) {
     <div class="searchbar"><input id="ip-q" value="${esc(w.word)}" placeholder="Từ khóa tiếng Anh"><button class="btn blue sm" id="ip-go">Tìm</button></div>
     <p class="muted">Mẹo: từ trừu tượng nên tìm bằng từ cụ thể hơn (vd: “flood”, “solar panel” cho <i>mitigate</i>). Bấm vào ảnh để chọn.</p>
     <div class="imggrid" id="ip-grid"><p class="muted">Đang tìm…</p></div>
-    <input id="ip-url" placeholder="…hoặc dán link ảnh (https://…)"><div class="row2"><button class="btn green sm" id="ip-use">Dùng link này</button><button class="btn ghost sm" id="ip-close">Đóng</button></div></div>`;
+    <h4>Dùng ảnh của bạn</h4>
+    <div class="pastebox" id="ip-paste" contenteditable="true" inputmode="none" data-ph="📋 Dán ảnh vào đây: chạm vào ô này rồi chọn “Dán / Paste” (hoặc bấm Ctrl+V)"></div>
+    <div class="row2"><button class="btn blue sm" id="ip-file-btn">📁 Chọn ảnh từ máy / chụp ảnh</button><button class="btn purple sm" id="ip-clip">📋 Dán từ bộ nhớ tạm</button></div>
+    <input type="file" id="ip-file" accept="image/*" hidden>
+    <input id="ip-url" placeholder="…hoặc dán link ảnh (https://…)"><div class="row2"><button class="btn green sm" id="ip-use">Dùng link này</button><button class="btn ghost sm" id="ip-close">Đóng</button></div>
+    ${LS.get('ielts.imgpick', {})[w.key] ? '<button class="btn danger sm" id="ip-clear">Bỏ ảnh đã chọn (dùng ảnh tự động)</button>' : ''}</div>`;
   document.body.appendChild(d);
-  const pick = im => { pinImage(w, im); onPick(im); d.remove(); toast('Đã chọn ảnh này cho từ “' + w.word + '”'); };
+  const pick = im => { pinImage(w, im); onPick(im); close(); toast('Đã chọn ảnh này cho từ “' + w.word + '”'); };
   const search = async () => {
     const g = $('#ip-grid', d); g.innerHTML = '<p class="muted">Đang tìm…</p>';
     const list = (await searchImages($('#ip-q', d).value.trim() || w.word)).slice(0, 18);
     g.innerHTML = list.length ? list.map((im, i) => `<button class="gi" data-i="${i}"><img src="${esc(im.src)}" alt="" referrerpolicy="no-referrer" loading="lazy"></button>`).join('') : '<p class="muted">Không tìm thấy ảnh. Thử từ khóa khác (hoặc thêm khóa Pixabay ở Cài đặt để có nhiều ảnh đẹp hơn).</p>';
     $$('.gi', g).forEach(b => b.onclick = () => pick(list[+b.dataset.i]));
   };
+  const useBlob = async blob => {
+    try {
+      if (!blob || !/^image\//.test(blob.type)) return toast('Đây không phải file ảnh.');
+      const out = await Imgs.fromBlob(blob); await Imgs.put(w.key, out);
+      pick({ src: Imgs.url(w.key), credit: 'Ảnh của bạn', link: '', local: true });
+    } catch (e) { toast('Không đọc được ảnh này – thử ảnh khác (JPG/PNG).'); }
+  };
+  const fromClip = e => { const f = [...(e.clipboardData?.files || [])].find(x => /^image\//.test(x.type)) || [...(e.clipboardData?.items || [])].find(x => /^image\//.test(x.type))?.getAsFile(); if (f) { e.preventDefault(); useBlob(f); } };
+  const docPaste = e => fromClip(e);
+  document.addEventListener('paste', docPaste);
+  const close = () => { document.removeEventListener('paste', docPaste); d.remove(); };
+  $('#ip-paste', d).addEventListener('paste', fromClip);
+  $('#ip-paste', d).addEventListener('input', e => { e.target.innerHTML = ''; });
+  $('#ip-file-btn', d).onclick = () => $('#ip-file', d).click();
+  $('#ip-file', d).onchange = e => { const f = e.target.files[0]; if (f) useBlob(f); };
+  $('#ip-clip', d).onclick = async () => {
+    try { for (const it of await navigator.clipboard.read()) { const t = it.types.find(x => /^image\//.test(x)); if (t) return useBlob(await it.getType(t)); } toast('Bộ nhớ tạm chưa có ảnh – hãy sao chép ảnh trước.'); }
+    catch { toast('Trình duyệt chưa cho đọc bộ nhớ tạm – hãy chạm vào ô “Dán ảnh vào đây” rồi chọn Dán.'); }
+  };
+  $('#ip-clear', d)?.addEventListener('click', async () => { const pk = LS.get('ielts.imgpick', {}); delete pk[w.key]; LS.set('ielts.imgpick', pk); await Imgs.remove(w.key); w.images = (w.images || []).filter(i => !i.pinned); window.onStoreSave?.(); close(); toast('Đã bỏ ảnh bạn chọn.'); });
   $('#ip-go', d).onclick = search; $('#ip-q', d).onkeydown = e => { if (e.key === 'Enter') search(); };
   $('#ip-use', d).onclick = () => { const u = $('#ip-url', d).value.trim(); if (/^https?:\/\//.test(u)) pick({ src: u, credit: 'Ảnh của bạn', link: '' }); else toast('Link ảnh phải bắt đầu bằng https://'); };
-  $('#ip-close', d).onclick = () => d.remove();
+  $('#ip-close', d).onclick = close;
   search();
 }
 
@@ -348,6 +422,7 @@ $$('#tabs button').forEach(b => b.onclick = () => { tab = b.dataset.tab; renderA
 function go(t) { tab = t; renderAll(); scrollTo(0, 0); }
 (async () => {
   $('#view').innerHTML = '<p class="loading">⏳ Đang tải danh sách từ vựng…</p>';
+  await Imgs.load().catch(() => { });
   await loadVocab();
   renderAll();
   if (Sync.cfg()) syncNow();

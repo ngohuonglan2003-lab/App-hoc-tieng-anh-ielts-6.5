@@ -40,8 +40,14 @@ Phần thưởng: +1 xu mỗi câu đúng, combo 5 câu liền +5, hoàn thành 
 - **Bật AI (khuyên dùng)**: Cài đặt → dán API key Claude (console.anthropic.com). Khi đó app tạo **đề Reading/Listening/Writing/Speaking mới theo chủ đề bất kỳ**, độ khó tăng dần như đề thật, và chấm Writing/Speaking như giám khảo, kèm sửa câu và bài mẫu. Key chỉ lưu trong trình duyệt của bạn; mỗi lần dùng tính phí theo tài khoản Anthropic (thường vài cent). Không dùng trên máy dùng chung. Phát âm chỉ ước lượng từ độ nhận dạng giọng nói của trình duyệt.
 - Ghi âm cần Chrome/Edge hoặc Safari; Firefox thì gõ câu trả lời.
 
+## Giọng đọc
+App tự chọn giọng tiếng Anh tốt nhất đang có trên thiết bị (ưu tiên giọng “Natural/Neural/Premium/Enhanced/Google”, tránh giọng robot) và cho bạn đổi giọng Mỹ/Anh, tốc độ, nghe thử ở **Cài đặt → Giọng đọc**.
+- **Miễn phí, tốt nhất:** dùng trình duyệt **Microsoft Edge** (giọng “Natural/Online” rất tự nhiên); iPhone/iPad: tải giọng *Enhanced/Premium* (Cài đặt → Trợ năng → Nội dung được đọc → Giọng nói); Chrome có “Google US English”.
+- **Giọng AI tự nhiên (tùy chọn):** dán key ElevenLabs; mỗi câu chỉ tốn phí lần đầu, sau đó lưu trong máy.
+- Từ đơn: có thể chọn “luôn dùng giọng đã chọn” để âm thanh đều giọng, thay vì giọng người thật của từ điển.
+
 ## Ảnh minh họa
-Ảnh tự động lấy từ Openverse / Wikimedia / Wikipedia, từ trừu tượng có thể chưa sát nghĩa. Bấm **🔎 Tìm ảnh** ở thẻ từ để tìm theo từ khóa khác và “ghim” ảnh bạn chọn (bài tập hình ảnh chỉ dùng ảnh bạn đã ghim). Thêm key **Pixabay** (miễn phí) ở Cài đặt để có ảnh chất lượng hơn.
+Ảnh tự động lấy từ Openverse / Wikimedia / Wikipedia, từ trừu tượng có thể chưa sát nghĩa. Bấm **🔎 Tìm ảnh** ở thẻ từ: tìm theo từ khóa khác, **dán ảnh bạn đã sao chép** (chạm vào ô dán rồi chọn Dán, hoặc Ctrl+V), **chọn ảnh/chụp ảnh từ máy**, hoặc dán link. Ảnh của bạn được thu nhỏ và lưu trong máy (không đồng bộ sang thiết bị khác); bài tập hình ảnh chỉ dùng ảnh bạn đã ghim. Thêm key **Pixabay** (miễn phí) ở Cài đặt để có ảnh chất lượng hơn.
 
 ## Đồng bộ iPad ↔ điện thoại (ID + mật khẩu)
 Dữ liệu được **mã hóa AES-GCM trên máy bạn** rồi mới gửi lên máy chủ, nên máy chủ không đọc được. Cần 1 lần thiết lập máy chủ miễn phí (Cloudflare Workers, ~5 phút):
