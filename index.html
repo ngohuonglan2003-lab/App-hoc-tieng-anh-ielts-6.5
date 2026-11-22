@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IELTS 6.5 · Học từ vựng mỗi ngày</title>
+<meta name="theme-color" content="#58cc02">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <header id="top"></header>
+  <main id="view"></main>
+  <nav id="tabs">
+    <button data-tab="home">🏠<span>Học</span></button>
+    <button data-tab="words">📚<span>Từ vựng</span></button>
+    <button data-tab="settings">⚙️<span>Cài đặt</span></button>
+  </nav>
+</div>
+<div id="lesson" class="lesson" hidden></div>
+<div id="modal" class="modal" hidden>
+  <div class="sheet"><button class="x" id="modal-x" aria-label="Đóng">✕</button><div id="modal-body"></div></div>
+</div>
+<div id="toast"></div>
+<script src="js/data.js"></script>
+<script src="js/exercises.js"></script>
+<script src="js/app.js"></script>
+<script>if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => { });</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "IELTS 6.5 – Học từ vựng mỗi ngày",
+  "short_name": "IELTS 6.5",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#58cc02",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

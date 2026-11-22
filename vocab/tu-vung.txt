@@ -1,0 +1,116 @@
+# ============================================================
+#  FILE TỪ VỰNG CỦA BẠN – chỉ cần sửa file này rồi tải lại trang
+# ============================================================
+#  Mỗi dòng 1 từ (hoặc cụm từ). Dòng bắt đầu bằng # là ghi chú.
+#  Cách đơn giản nhất: chỉ cần gõ từ tiếng Anh, ví dụ:
+#       resilient
+#  App sẽ TỰ ĐỘNG tìm: phiên âm, audio US/UK, định nghĩa, câu mẫu,
+#  từ đồng/trái nghĩa, cụm từ đi kèm, hình ảnh, video, nghĩa tiếng Việt.
+#
+#  Nếu muốn tự quyết định, thêm các cột (ngăn cách bằng dấu |), cột nào
+#  không cần thì để trống:
+#       từ | nghĩa tiếng Việt | chủ đề | câu ví dụ riêng | link ảnh riêng
+#  Ví dụ:
+#       mitigate | giảm nhẹ | Environment | Trees help mitigate the effects of climate change.
+# ============================================================
+
+# ---------- Environment ----------
+mitigate | giảm nhẹ, làm dịu | Environment | Governments must act now to mitigate the effects of climate change.
+deforestation | nạn phá rừng | Environment
+renewable | có thể tái tạo | Environment
+emission | khí thải | Environment
+sustainable | bền vững | Environment
+biodiversity | đa dạng sinh học | Environment
+conservation | sự bảo tồn | Environment
+drought | hạn hán | Environment
+ecosystem | hệ sinh thái | Environment
+carbon footprint | lượng khí thải carbon | Environment
+fossil fuel | nhiên liệu hóa thạch | Environment
+pollution | ô nhiễm | Environment
+
+# ---------- Education ----------
+curriculum | chương trình giảng dạy | Education
+tuition | học phí | Education
+literacy | khả năng đọc viết | Education
+scholarship | học bổng | Education
+vocational | thuộc về hướng nghiệp | Education
+compulsory | bắt buộc | Education
+tertiary | (giáo dục) bậc đại học | Education
+extracurricular | ngoại khóa | Education
+peer pressure | áp lực từ bạn bè | Education
+academic | thuộc về học thuật | Education
+
+# ---------- Technology ----------
+innovation | sự đổi mới | Technology
+automation | tự động hóa | Technology
+artificial intelligence | trí tuệ nhân tạo | Technology
+obsolete | lỗi thời | Technology
+breakthrough | bước đột phá | Technology
+digital | kỹ thuật số | Technology
+addiction | sự nghiện | Technology
+surveillance | sự giám sát | Technology
+accessible | dễ tiếp cận | Technology
+cutting-edge | tiên tiến nhất | Technology
+
+# ---------- Health ----------
+obesity | béo phì | Health
+sedentary | ít vận động | Health
+nutrition | dinh dưỡng | Health
+epidemic | dịch bệnh | Health
+chronic | mãn tính | Health
+preventive | mang tính phòng ngừa | Health
+well-being | sức khỏe và hạnh phúc | Health
+lifespan | tuổi thọ | Health
+diagnosis | sự chẩn đoán | Health
+mental health | sức khỏe tinh thần | Health
+
+# ---------- Society ----------
+inequality | bất bình đẳng | Society
+urbanisation | đô thị hóa | Society
+unemployment | thất nghiệp | Society
+poverty | nghèo đói | Society
+immigration | nhập cư | Society
+generation gap | khoảng cách thế hệ | Society
+discrimination | sự phân biệt đối xử | Society
+welfare | phúc lợi | Society
+ageing population | dân số già hóa | Society
+community | cộng đồng | Society
+
+# ---------- Work ----------
+workforce | lực lượng lao động | Work
+promotion | sự thăng chức | Work
+flexible | linh hoạt | Work
+remote | từ xa | Work
+income | thu nhập | Work
+employer | nhà tuyển dụng | Work
+commute | đi lại hằng ngày (đi làm) | Work
+productivity | năng suất | Work
+burnout | kiệt sức | Work
+career | sự nghiệp | Work
+
+# ---------- Task 1 (mô tả biểu đồ) ----------
+fluctuate | dao động | Task 1
+plummet | giảm mạnh, rớt thảm | Task 1
+surge | tăng vọt | Task 1
+stabilise | ổn định | Task 1
+proportion | tỉ lệ | Task 1
+steady | đều đặn, ổn định | Task 1
+decline | suy giảm | Task 1
+peak | đạt đỉnh | Task 1
+undergo | trải qua | Task 1
+considerable | đáng kể | Task 1
+
+# ---------- Academic words (dùng được mọi chủ đề) ----------
+crucial | thiết yếu, then chốt | Academic
+controversial | gây tranh cãi | Academic
+advocate | ủng hộ, người ủng hộ | Academic
+detrimental | có hại | Academic
+enhance | nâng cao | Academic
+implement | thực hiện, triển khai | Academic
+substantial | đáng kể, lớn | Academic
+inevitable | không thể tránh khỏi | Academic
+consequence | hậu quả | Academic
+alleviate | làm giảm bớt | Academic
+contemporary | đương đại | Academic
+phenomenon | hiện tượng | Academic
+resilient | kiên cường, có khả năng phục hồi | Academic
