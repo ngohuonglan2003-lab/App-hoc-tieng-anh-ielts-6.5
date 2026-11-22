@@ -237,3 +237,16 @@ button.pill{border:0;cursor:pointer;font:inherit;font-weight:800}
 .pastebox{min-height:58px;border:2px dashed var(--blue);border-radius:14px;padding:12px;margin:8px 0;color:var(--muted);font-size:14px;outline:none;background:rgba(28,176,246,.06)}
 .pastebox:empty:before{content:attr(data-ph)}.pastebox:focus{border-style:solid}
 .pbox h4{margin:12px 0 4px}
+
+/* ===== Pipo phong cách mới ===== */
+.pipo{width:84px;height:72px;overflow:visible;animation:bob 2.6s ease-in-out infinite}
+.pipo.big{width:118px;height:101px}
+.pipo .wing{transform-origin:44px 72px;animation:flap .6s ease-in-out infinite alternate}
+.pipo .drink{transform-origin:106px 92px;animation:sway 2.6s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(-6deg)}}
+.pipo .spark{transform-origin:112px 30px;animation:twinkle 2s ease-in-out infinite}
+.pipo .spark.s2{transform-origin:24px 46px;animation-delay:.9s}
+@keyframes twinkle{0%,100%{transform:scale(.4);opacity:.3}50%{transform:scale(1);opacity:1}}
+.rdot{overflow:visible}.rstop:not(.lock) .rdot .pipo{width:56px;height:48px;margin-top:-4px;animation:none}
+.mascotrow .bubble{background:linear-gradient(135deg,#17224a,#0e1636);color:#fff6d6;border:1.5px solid #d9a93a;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+.mascotrow .bubble:before{border-right-color:#17224a}

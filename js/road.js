@@ -132,20 +132,43 @@ const TRAVEL = [
     fact: 'Wellington thường được gọi là thủ đô cực nam của thế giới trong số các thủ đô quốc gia.' }
 ];
 
-/* Chú chim du lịch "Pipo" – vẽ bằng SVG, cánh vỗ bằng CSS */
+/* Chú chim du lịch "Pipo" phong cách: mũ cơ trưởng, kính phi công, dây chuyền vàng, cocktail */
+let PIPO_N = 0;
 function pipoSVG(big = false) {
-  return `<svg class="pipo ${big ? 'big' : ''}" viewBox="0 0 120 100" aria-label="Pipo" role="img">
-    <path class="wing" d="M34 58 Q12 40 22 24 Q40 36 50 56 Z" fill="#29b6f6"/>
-    <ellipse cx="60" cy="60" rx="34" ry="28" fill="#4fc3f7"/>
-    <circle cx="60" cy="38" r="24" fill="#4fc3f7"/>
-    <circle cx="52" cy="34" r="6" fill="#fff"/><circle cx="53" cy="35" r="3" fill="#222"/>
-    <circle cx="68" cy="34" r="6" fill="#fff"/><circle cx="69" cy="35" r="3" fill="#222"/>
-    <circle cx="46" cy="45" r="4" fill="#ff8fa3" opacity=".7"/><circle cx="74" cy="45" r="4" fill="#ff8fa3" opacity=".7"/>
-    <polygon points="56,42 64,42 60,50" fill="#ffa000"/>
-    <path d="M36 68 Q60 78 84 68 L80 76 Q60 84 40 76 Z" fill="#ef5350"/>
-    <path d="M80 70 Q94 66 92 80 Q86 76 80 76 Z" fill="#ef5350"/>
-    <ellipse cx="48" cy="90" rx="6" ry="3" fill="#ffb300"/><ellipse cx="72" cy="90" rx="6" ry="3" fill="#ffb300"/>
-  </svg>`;
+  const u = 'pp' + (++PIPO_N);
+  return `<svg class="pipo ${big ? 'big' : ''}" viewBox="0 0 140 120" aria-label="Pipo" role="img">
+  <defs>
+    <linearGradient id="${u}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#37d0c4"/><stop offset="1" stop-color="#1a5fa8"/></linearGradient>
+    <linearGradient id="${u}w" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f8fc4"/><stop offset="1" stop-color="#14407a"/></linearGradient>
+    <linearGradient id="${u}v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff9ec"/><stop offset="1" stop-color="#ffe2b0"/></linearGradient>
+    <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".55" stop-color="#e8b53a"/><stop offset="1" stop-color="#a87a14"/></linearGradient>
+    <linearGradient id="${u}l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a2f5a"/><stop offset="1" stop-color="#0c0f24"/></linearGradient>
+    <linearGradient id="${u}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#27386e"/><stop offset="1" stop-color="#101a3d"/></linearGradient>
+  </defs>
+  <ellipse cx="70" cy="113" rx="32" ry="5" fill="#000" opacity=".16"/>
+  <path d="M96 78 Q122 84 124 104 Q104 100 92 92Z" fill="url(#${u}w)"/><path d="M92 84 Q112 96 112 108 Q96 104 88 92Z" fill="#14407a"/>
+  <ellipse cx="70" cy="74" rx="35" ry="33" fill="url(#${u}b)"/>
+  <ellipse cx="70" cy="82" rx="21" ry="23" fill="url(#${u}v)"/>
+  <path d="M52 68 Q70 86 88 68" fill="none" stroke="url(#${u}g)" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="70" cy="80" r="4.6" fill="url(#${u}g)"/><path d="M70 77.3 l1.2 2.4 2.6.3-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.3z" fill="#fff6d6" opacity=".95"/>
+  <circle cx="70" cy="46" r="26" fill="url(#${u}b)"/>
+  <path d="M60 22 Q56 10 64 8 Q64 16 70 20Z" fill="#37d0c4"/>
+  <path d="M44 41 Q45 17 70 15 Q95 17 96 41 Q70 33 44 41Z" fill="url(#${u}c)"/>
+  <path d="M40 42 Q70 30 100 42 Q70 50 40 42Z" fill="#0c1536"/><path d="M42 41.4 Q70 31.8 98 41.4" fill="none" stroke="url(#${u}g)" stroke-width="1.6"/>
+  <circle cx="70" cy="26" r="6.2" fill="url(#${u}g)"/><path d="M63.5 26 l4-2.4 2.5 2.1 2.5-2.1 4 2.4-3.6 1.6-2.9-1.4-2.9 1.4z" fill="#14213d"/>
+  <path d="M48 50 h19 q-.8 12.5-9.5 12.5 q-9-0-9.5-12.5z" fill="url(#${u}l)" stroke="url(#${u}g)" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M73 50 h19 q-.8 12.5-9.5 12.5 q-9 0-9.5-12.5z" fill="url(#${u}l)" stroke="url(#${u}g)" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M67 52.5 q3-3.2 6 0" fill="none" stroke="url(#${u}g)" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M52 53 l5-1.6M77 53 l5-1.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>
+  <path d="M62.5 62.5 Q70 58.5 77.5 62.5 Q70 73 62.5 62.5Z" fill="url(#${u}g)"/>
+  <path class="wing" d="M38 68 Q10 58 14 90 Q34 94 46 82Z" fill="url(#${u}w)"/><path class="wing" d="M32 72 Q18 70 18 86 Q30 86 40 78Z" fill="#14407a" opacity=".55"/>
+  <g class="drink"><path d="M101 76 h17 l-8.5 17Z" fill="#fff" opacity=".4" stroke="#ffffff" stroke-width="1.2" stroke-linejoin="round"/><path d="M104 81 h11 l-5.5 11Z" fill="#ff9248"/>
+    <path d="M112 78 L120 62" stroke="#e8b53a" stroke-width="1.8" stroke-linecap="round"/><path d="M114 66 q6-8 12-2z" fill="#ff5d73"/><circle cx="108" cy="79" r="2.6" fill="#e0245e"/>
+    <path d="M110 93 v8M104 101h12" stroke="#fff" stroke-width="1.5" stroke-linecap="round" opacity=".8"/></g>
+  <path d="M60 105 l-2 7h8zM80 105 l-2 7h8z" fill="url(#${u}g)"/>
+  <path class="spark" d="M112 22 l2.4 6.6 6.6 2.4-6.6 2.4-2.4 6.6-2.4-6.6-6.6-2.4 6.6-2.4z" fill="url(#${u}g)"/>
+  <path class="spark s2" d="M24 40 l1.5 4.2 4.2 1.5-4.2 1.5-1.5 4.2-1.5-4.2-4.2-1.5 4.2-1.5z" fill="#ffe9a8"/>
+</svg>`;
 }
 
 function pipoMessage(cur) {
@@ -153,8 +176,8 @@ function pipoMessage(cur) {
   if (!cur) return 'Tuyệt vời! Chúng ta đã đi hết hành trình rồi! 🎉';
   const t = TRAVEL[cur.stage - 1];
   return stageUnlocked(cur.stage) && cur.stage > 1 && left === stageNodeCount(cur.stage)
-    ? `Chào mừng đến ${t.city}! Cùng khám phá nhé ✈️`
-    : `Còn ${left} bài nữa là bay tới chặng sau! 🧳`;
+    ? `Welcome to ${t.city}! Cùng khám phá thôi ✈️`
+    : `Còn ${left} bài nữa là cất cánh tới chặng sau ✈️`;
 }
 const stageNodeCount = s => STAGES[s - 1].nodes.filter(id => id[0] !== 'M').length;
 
