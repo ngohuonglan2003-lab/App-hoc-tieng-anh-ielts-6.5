@@ -23,7 +23,7 @@ async function decryptObj(s, keyB64) {
 }
 
 function snapshot() {
-  return { v: 1, t: Date.now(), progress: Store.progress, profile: Store.profile, gstats: Store.gstats, exams: Store.exams,
+  return { v: 1, t: Date.now(), progress: Store.progress, profile: Store.profile, gstats: Store.gstats, exams: Store.exams, road: Store.road,
     extra: LS.get('ielts.extra', ''), upload: LS.get('ielts.upload', null), imgpick: LS.get('ielts.imgpick', {}) };
 }
 
@@ -46,7 +46,11 @@ function mergeSnap(a, b) {
   const exams = [...new Map([...(a.exams || []), ...(b.exams || [])].map(e => [e.id, e])).values()].sort((x, y) => x.id - y.id).slice(-100);
   const lines = s => String(s || '').split('\n').map(x => x.trim()).filter(Boolean);
   const extra = [...new Set([...lines(a.extra), ...lines(b.extra)])].join('\n');
-  return { v: 1, t: Math.max(a.t || 0, b.t || 0), progress, profile, gstats, exams, extra, upload: (b.t || 0) > (a.t || 0) ? b.upload : a.upload, imgpick: { ...(b.imgpick || {}), ...(a.imgpick || {}) } };
+  const ra = a.road || { nodes: {} }, rb = b.road || { nodes: {} }, nodes = { ...(ra.nodes || {}) };
+  for (const [id, x] of Object.entries(rb.nodes || {})) { const y = nodes[id]; nodes[id] = !y ? x : ((x.checkAt || x.at || 0) > (y.checkAt || y.at || 0) ? { ...x, done: x.done || y.done } : { ...y, done: x.done || y.done }); }
+  const road = { ...ra, ...rb, nodes, placement: ra.placement || rb.placement, checks: [...new Map([...(ra.checks || []), ...(rb.checks || [])].map(c => [c.date + c.kind + c.ok, c])).values()].slice(-30),
+    lastWeekly: Math.max(ra.lastWeekly || 0, rb.lastWeekly || 0), lastMonthly: Math.max(ra.lastMonthly || 0, rb.lastMonthly || 0), unlocked: { ...(ra.unlocked || {}), ...(rb.unlocked || {}) } };
+  return { v: 1, t: Math.max(a.t || 0, b.t || 0), progress, profile, gstats, exams, road, extra, upload: (b.t || 0) > (a.t || 0) ? b.upload : a.upload, imgpick: { ...(b.imgpick || {}), ...(a.imgpick || {}) } };
 }
 
 function applySnap(s) {
@@ -55,6 +59,7 @@ function applySnap(s) {
   Object.assign(Store.profile, s.profile);
   Object.keys(Store.gstats).forEach(k => delete Store.gstats[k]); Object.assign(Store.gstats, s.gstats);
   Store.exams.length = 0; Store.exams.push(...s.exams);
+  if (s.road) { Object.keys(Store.road).forEach(k => delete Store.road[k]); Object.assign(Store.road, s.road); }
   LS.set('ielts.extra', s.extra || ''); s.upload == null ? LS.del('ielts.upload') : LS.set('ielts.upload', s.upload); LS.set('ielts.imgpick', s.imgpick || {});
   Store.save(); Sync.applying = false;
 }

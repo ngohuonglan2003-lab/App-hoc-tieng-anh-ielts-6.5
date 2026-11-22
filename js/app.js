@@ -1,6 +1,6 @@
 'use strict';
 /* ===== Giao diện chính ===== */
-let tab = 'home', topicFilter = 'all', search = '';
+let tab = 'road', topicFilter = 'all', search = '';
 
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
@@ -21,8 +21,9 @@ const topics = () => [...new Set(Vocab.entries.map(e => e.topic))];
 function renderTop() {
   const p = Store.profile;
   $('#top').innerHTML = `<div class="logo">IELTS <b>6.5</b></div>
-    <div class="pills"><span class="pill fire" title="Chuỗi ngày học liên tiếp">🔥 ${effectiveStreak()}</span><span class="pill xp" title="Tổng điểm XP">⭐ ${p.xp}</span><span class="pill coin" title="Xu">🪙 ${p.coins}</span><span class="pill sync" id="syncpill" hidden></span></div>`;
+    <div class="pills"><span class="pill fire" title="Chuỗi ngày học liên tiếp">🔥 ${effectiveStreak()}</span><span class="pill xp" title="Tổng điểm XP">⭐ ${p.xp}</span><button class="pill coin" id="coinpill" title="Cửa hàng">🪙 ${p.coins}</button><span class="pill sync" id="syncpill" hidden></span></div>`;
   setSyncStatus(Sync.cfg() ? (Sync.status === 'off' ? 'ok' : Sync.status) : 'off');
+  $('#coinpill').onclick = () => go('shop');
 }
 
 function ring(v, max) {
@@ -36,6 +37,7 @@ function viewHome() {
   const opts = ['<option value="all">Tất cả chủ đề</option>', ...topics().map(t => `<option ${t === topicFilter ? 'selected' : ''}>${esc(t)}</option>`)].join('');
   $('#view').innerHTML = `
   ${petCardHTML()}
+  <button class="btn ghost" id="toshop">🛍️ Cửa hàng – mua thú cưng & vật phẩm</button>
   <section class="card goal">
     ${ring(xt, p.goal)}
     <div><h2>Mục tiêu hôm nay</h2><p>${xt}/${p.goal} XP${xt >= p.goal ? ' – tuyệt vời! 🎉' : ' – học 1 bài ≈ 80–120 XP'}</p>
@@ -61,6 +63,7 @@ function viewHome() {
   <p class="tip">💡 Mỗi bài ~10–15 phút gồm: thẻ từ mới (ảnh, phiên âm, câu mẫu, video) → trắc nghiệm → nghe → điền từ → xếp câu → viết → nói. Từ sai sẽ được ôn lại sớm hơn (lặp lại ngắt quãng).</p>`;
   $('#topic')?.addEventListener('change', e => { topicFilter = e.target.value; });
   $$('[data-start]').forEach(b => b.onclick = () => startLesson(b.dataset.start));
+  $('#toshop').onclick = () => go('shop');
   $('#gstart').onclick = () => startGrammar($('#gtopic').value);
   $('#chest')?.addEventListener('click', openChest);
 }
@@ -191,7 +194,7 @@ function viewSettings() {
 function renderAll() {
   renderTop();
   $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
-  ({ home: viewHome, speaking: viewSpeaking, exam: viewExam, words: viewWords, shop: viewShop, settings: viewSettings })[tab]();
+  ({ road: viewRoad, home: viewHome, speaking: viewSpeaking, exam: viewExam, words: viewWords, shop: viewShop, settings: viewSettings })[tab]();
 }
 
 /* ============ Thẻ từ vựng giàu nội dung (dùng cho bài học & xem chi tiết) ============ */
@@ -311,7 +314,7 @@ function planSession(mode) {
   const now = Date.now(), P = Store.progress;
   const list = Vocab.entries.filter(e => topicFilter === 'all' || e.topic === topicFilter);
   const due = list.filter(e => P[e.key] && P[e.key].due <= now).sort((a, b) => P[a.key].due - P[b.key].due);
-  const fresh = list.filter(e => !P[e.key]);
+  const fresh = list.filter(e => !P[e.key]).sort((a, b) => roadRank(a) - roadRank(b));   // ưu tiên theo thứ tự lộ trình
   let nNew = 3, nRev = 5;
   if (mode === 'new') { nNew = 6; nRev = 0; } else if (mode === 'review') { nNew = 0; nRev = 8; }
   let nw = fresh.slice(0, nNew), rev = due.slice(0, nRev);

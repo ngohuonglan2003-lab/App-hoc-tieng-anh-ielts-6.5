@@ -5,12 +5,13 @@ const cur = () => L?.queue[L.i];
 const accentLang = () => Store.profile.accent === 'uk' ? 'en-GB' : 'en-US';
 const normTok = t => t.toLowerCase().replace(/[^a-z0-9'-]/g, '');
 
-function runLesson({ queue, words, ctx, kind = 'vocab', mode, redo }) {
+function runLesson({ queue, words, ctx, kind = 'vocab', mode, redo, test = false, onDone }) {
   if (!queue.length) return toast('Chưa tạo được bài tập – hãy thử lại.');
   const p = Store.profile; let hearts = 5, boosted = false;
-  if (p.items.hearts > 0) { p.items.hearts--; hearts += 3; boosted = true; Store.save(); }
+  if (test) hearts = 999;
+  else if (p.items.hearts > 0) { p.items.hearts--; hearts += 3; boosted = true; Store.save(); }
   $('#lesson').hidden = false; document.body.classList.add('noscroll');
-  L = { queue, i: 0, hearts, xp: 0, coins: 0, done: 0, ok: 0, tries: 0, res: {}, ctx, words, kind, mode, redo, combo: 0, bestCombo: 0, boosted };
+  L = { queue, i: 0, hearts, xp: 0, coins: 0, done: 0, ok: 0, tries: 0, res: {}, ctx, words, kind, mode, redo, combo: 0, bestCombo: 0, boosted, test, onDone, log: [] };
   window.__imgFail = () => { if (cur()?.type === 'image') { L.queue.splice(L.i, 1); toast('Ảnh không tải được – chuyển câu khác'); step(); } };
   if (boosted) toast('💗 Đã dùng Tim dự phòng: +3 tim');
   step();
@@ -40,7 +41,7 @@ function step() {
   const left = L.queue.length - L.i, pct = Math.round(L.done / (L.done + left) * 100), pet = petOf();
   const root = $('#lesson');
   root.innerHTML = `
-  <div class="lhead"><button class="x" id="lq" aria-label="Thoát">✕</button><div class="pbar"><i style="width:${pct}%"></i></div><div class="hearts">${pet ? pet.e + ' ' : ''}❤️ ${L.hearts}</div></div>
+  <div class="lhead"><button class="x" id="lq" aria-label="Thoát">✕</button><div class="pbar"><i style="width:${pct}%"></i></div><div class="hearts">${pet ? pet.e + ' ' : ''}${L.test ? `📝 ${L.i + 1}/${L.queue.length}` : '❤️ ' + L.hearts}</div></div>
   <div class="lbody" id="lb"></div>
   <footer class="lfoot" id="lf"><div class="fb" id="fb"></div><div class="fbtns"><button class="btn ghost" id="lskip" hidden></button><button class="btn green" id="lcheck" disabled>KIỂM TRA</button></div></footer>`;
   $('#lq').onclick = () => { if (confirm('Thoát bài học? Tiến độ bài này sẽ không được lưu.')) closeLesson(); };
@@ -66,6 +67,10 @@ function step() {
       $$('.opt', body).forEach((b, i) => { if (ex.options[i].correct) b.classList.add('right'); else if (i === L.sel) b.classList.add('wrong'); b.disabled = true; });
       settle(o.correct);
     };
+    if (L.test) {
+      skip.hidden = false; skip.textContent = 'TÔI KHÔNG BIẾT';
+      skip.onclick = () => { $$('.opt', body).forEach((b, i) => { if (ex.options[i].correct) b.classList.add('right'); b.disabled = true; }); settle(false); };
+    }
   } else if (ex.kind === 'type') {
     body.innerHTML = `<h3 class="ltitle">${esc(ex.title)}</h3><div class="prompt">${ex.promptHTML}</div>
       <input id="tin" class="tin" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${ex.sentence ? 'Gõ lại cả câu…' : 'Gõ đáp án bằng tiếng Anh…'}">`;
@@ -142,13 +147,13 @@ function settle(ok, note = '') {
   const key = ex.rk || w.key, r = L.res[key] ||= { bad: false };
   beep(ok);
   if (!ex.retry) {
-    L.tries++;
+    L.tries++; L.log.push({ node: ex.node, key: ex.w?.key, ok });
     if (ex.topic) { const s = Store.gstats[ex.topic] ||= { ok: 0, bad: 0 }; ok ? s.ok++ : s.bad++; }
     if (ok) { L.ok++; L.xp += 10; L.coins += 1; L.combo++; L.bestCombo = Math.max(L.bestCombo, L.combo); if (L.combo % 5 === 0) { L.coins += 5; comboBanner(L.combo); } }
   }
   if (!ok) {
-    L.combo = 0; r.bad = true; L.hearts--;
-    if (L.hearts > 0) { const again = ex.again ? ex.again() : (w ? makeFor(w, 0, L.ctx, [ex.type]) : null); if (again) { again.retry = true; L.queue.push(again); } }
+    L.combo = 0; r.bad = true; if (!L.test) L.hearts--;
+    if (L.hearts > 0 && !L.test) { const again = ex.again ? ex.again() : (w ? makeFor(w, 0, L.ctx, [ex.type]) : null); if (again) { again.retry = true; L.queue.push(again); } }
   }
   const fb = $('#fb'), lf = $('#lf'), check = $('#lcheck');
   lf.className = 'lfoot ' + (ok ? 'ok' : 'bad');
@@ -185,6 +190,11 @@ function finishLesson(failed) {
     gifts.forEach(g => { /* xu quà đã được cộng trong grantXP */ });
   }
   Store.save();
+  if (L.onDone) {
+    const sum = { log: L.log, ok: L.ok, tries: L.tries, failed, xp: gainedXP, coins: gainedXP > 0 ? coins : 0 };
+    if (L.test) return L.onDone(sum);
+    try { L.onDone(sum); } catch (e) { console.error(e); }
+  }
   const acc = L.tries ? Math.round(L.ok / L.tries * 100) : 0, pet = petOf();
   const good = (L.words || []).filter(w => !L.res[w.key]?.bad), weak = (L.words || []).filter(w => L.res[w.key]?.bad);
   const m = L.mode, redo = L.redo;

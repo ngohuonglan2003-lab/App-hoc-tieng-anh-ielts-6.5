@@ -11,14 +11,25 @@ Web app (cài được như app trên điện thoại/iPad) để ôn IELTS mụ
 Sửa `vocab/tu-vung.txt`, mỗi dòng một từ (xem hướng dẫn trong file). Cột tùy chọn: `từ | nghĩa Việt | chủ đề | câu ví dụ | link ảnh`.
 App tự tìm phiên âm, audio US/UK, định nghĩa, câu mẫu (kèm dịch), đồng/trái nghĩa, cụm từ đi cùng, ảnh, video và nghĩa tiếng Việt.
 
+## 🗺️ Lộ trình IELTS 6.5 (tab mặc định)
+- **5 chặng** từ dễ đến khó: Nền tảng (4.5) → Tăng tốc (5.0) → Bứt phá (5.5) → Chinh phục (6.0) → Đích 6.5. Tổng 66 bài: 24 bài kỹ năng (lý thuyết + quiz), 13 chủ đề ngữ pháp, gói từ vựng (chủ đề cơ bản, Academic Word List 1–3, collocation, các chủ đề trong file của bạn), thử thách cuối chặng.
+- Bản đồ kiểu trò chơi: bài khóa/mở, sao, “Bắt đầu”, thưởng xu khi xong bài/chặng.
+- **Test đầu vào thích ứng**: phần đã biết được bỏ qua, chặng ≥ 85% bỏ qua cả chặng, dừng khi một chặng < 60%.
+- **⚡ Vượt chặng** bất cứ lúc nào (đúng ≥ 85%).
+- **Kiểm tra tuần (15 câu) / tháng (30 câu)**: tìm phần đã quên → đánh dấu ⚠ cần ôn, từ sai vào lượt ôn sớm nhất; app tự nhắc khi đến hạn.
+- **Cẩm nang PDF**: `docs/cam-nang-ielts-6.5.pdf` (định dạng đề, bảng quy đổi band, lộ trình 16 tuần, sách theo chặng, toàn bộ lý thuyết, ngữ pháp, từ vựng). Tạo lại bằng `node tools/build-pdf.js` sau khi sửa `js/road-data.js`.
+
+> Về bản quyền: app và cẩm nang không chứa nội dung sao chép từ sách IELTS có bản quyền. Sách được giới thiệu để mua/mượn bản chính hãng; đề mẫu miễn phí có link chính thức.
+
 ## Các phần của app
 | Tab | Nội dung |
 |---|---|
-| 🏠 Học | Bài từ vựng (thẻ từ → trắc nghiệm → nghe → điền từ → xếp câu → nghe chép → đọc câu → viết → nói), **Ngữ pháp & cách dùng từ** (65 câu theo 13 chủ đề), thú cưng, rương quà |
+| 🗺️ Lộ trình | Bản đồ 5 chặng, test đầu vào, kiểm tra tuần/tháng, danh sách sách & tài liệu |
+| 🏠 Luyện | Bài từ vựng (thẻ từ → trắc nghiệm → nghe → điền từ → xếp câu → nghe chép → đọc câu → viết → nói), **Ngữ pháp & cách dùng từ** (65 câu theo 13 chủ đề), thú cưng, rương quà |
 | 🎤 Nói | Luyện nói theo cấu trúc IELTS Part 1/2/3: giám khảo hỏi, bạn trả lời bằng giọng nói, chấm 4 tiêu chí |
 | 📝 Thi thử | Listening, Reading, Writing Task 1/2, Speaking, hoặc **thi đầy đủ**; chọn chủ đề đã học / mới / ngẫu nhiên; Band ước lượng từng kỹ năng + tổng |
 | 📚 Từ vựng | Danh sách, tìm kiếm, xem thẻ chi tiết, **chọn lại ảnh minh họa** |
-| 🛍️ Quà | Xu, cấp độ, mua thú cưng, Băng đóng chuỗi, Tim dự phòng, Hộp quà |
+| 🪙 (bấm số xu trên cùng) | Cửa hàng: thú cưng, Băng đóng chuỗi, Tim dự phòng, Hộp quà |
 | ⚙️ Cài đặt | File từ vựng, AI, ảnh, đồng bộ, tùy chỉnh |
 
 Phần thưởng: +1 xu mỗi câu đúng, combo 5 câu liền +5, hoàn thành bài +10, bài hoàn hảo +10, lên cấp có quà, đạt mục tiêu ngày mở rương.

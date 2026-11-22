@@ -187,3 +187,30 @@ details.card summary{cursor:pointer;font-weight:800}
 .sync-status{font-weight:800;margin:6px 0}
 @media (max-width:420px){.crit{grid-template-columns:1fr}.pets{grid-template-columns:repeat(2,1fr)}}
 .qtr:empty{display:none}
+
+/* ===== Lộ trình dạng game ===== */
+button.pill{border:0;cursor:pointer;font:inherit;font-weight:800}
+.roadhead .pbar{height:14px;margin:8px 0}
+.callout{border-color:var(--blue);background:rgba(28,176,246,.07)}.warnc{border-color:var(--yellow);background:rgba(255,200,0,.1)}.badc{border-color:var(--red);background:rgba(255,75,75,.07)}
+.weaklist{display:flex;flex-wrap:wrap;gap:6px}
+.stage{margin:22px 0;border-radius:20px;padding:0 0 10px}
+.stagehead{display:flex;align-items:center;gap:10px;background:var(--c);color:#fff;border-radius:18px;padding:12px 14px;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.stagehead .muted{color:rgba(255,255,255,.9)}.stagehead .chip{background:rgba(255,255,255,.95);color:var(--c);border-color:transparent}.stagehead .tag{background:#fff}
+.se{font-size:34px}.stdesc{margin:8px 4px}
+.stage.locked .stagehead{filter:grayscale(.85);opacity:.8}
+.path{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0}
+.nwrap{display:flex;flex-direction:column;align-items:center;position:relative;width:120px}
+.node{width:72px;height:72px;border-radius:50%;border:0;background:var(--line);box-shadow:0 6px 0 rgba(0,0,0,.18);font-size:30px;cursor:pointer;position:relative;transition:transform .1s}
+.node:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.node.done{background:var(--c);box-shadow:0 6px 0 rgba(0,0,0,.25)}.node.skip{background:linear-gradient(135deg,var(--c),#ffd54d)}
+.node.lock{background:var(--soft);color:var(--muted);font-size:24px;box-shadow:0 6px 0 var(--line)}
+.node.cur{background:var(--c);animation:pulsec 1.6s ease infinite;outline:6px solid rgba(255,255,255,.0)}
+@keyframes pulsec{50%{box-shadow:0 6px 0 rgba(0,0,0,.25),0 0 0 12px color-mix(in srgb,var(--c) 30%,transparent)}}
+.node.boss{width:90px;height:90px;font-size:40px;border-radius:26px}
+.node.weak{outline:4px solid var(--red);outline-offset:3px}
+.wk{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border-radius:50%;width:22px;height:22px;font-size:14px;font-style:normal;font-weight:900;display:grid;place-items:center}
+.nlabel{font-size:12px;font-weight:800;text-align:center;margin-top:6px;line-height:1.25;max-width:130px}
+.stars{color:#ffb800;font-size:13px;letter-spacing:1px}.stars.big{font-size:28px}
+.startbub{position:absolute;top:-30px;background:var(--bg);border:2px solid var(--line);color:var(--c);font-weight:900;font-size:12px;padding:3px 10px;border-radius:10px;animation:bn 1.2s ease infinite;z-index:1}
+.res{padding:8px 0;border-bottom:1px dashed var(--line)}.res a{color:var(--blue)}
+.theory p,.theory li{font-size:16.5px;line-height:1.65}.theory h2{margin-bottom:10px}

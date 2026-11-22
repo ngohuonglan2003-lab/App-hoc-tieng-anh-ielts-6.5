@@ -39,10 +39,11 @@ const Store = {
   profile: (() => { const d = PROFILE_DEFAULTS(), s = LS.get('ielts.profile', {}); return Object.assign(d, s, { items: Object.assign(d.items, s.items), pets: Object.assign({}, s.pets) }); })(),
   gstats: LS.get('ielts.gstats', {}),        // chủ đề ngữ pháp -> {ok, bad}
   exams: LS.get('ielts.exams', []),          // lịch sử thi thử
+  road: Object.assign({ nodes: {}, placement: null, checks: [], lastWeekly: 0, lastMonthly: 0, unlocked: {} }, LS.get('ielts.road', {})),
   save() {
     this.profile.updatedAt = Date.now();
     LS.set('ielts.progress', this.progress); LS.set('ielts.profile', this.profile);
-    LS.set('ielts.gstats', this.gstats); LS.set('ielts.exams', this.exams);
+    LS.set('ielts.gstats', this.gstats); LS.set('ielts.exams', this.exams); LS.set('ielts.road', this.road);
     window.onStoreSave?.();
   },
   xpToday() { return this.profile.xpByDay[todayStr()] || 0; }
@@ -60,6 +61,15 @@ async function loadVocab() {
   }
   Vocab.text = base + '\n' + LS.get('ielts.extra', '');
   Vocab.entries = parseVocab(Vocab.text);
+  // Thêm các gói từ vựng của lộ trình (nếu từ chưa có trong file của bạn)
+  if (typeof PACKS !== 'undefined') {
+    const have = new Set(Vocab.entries.map(e => e.key));
+    for (const pk of Object.values(PACKS)) for (const w of pk.words) {
+      const key = w.word.toLowerCase(); if (have.has(key)) continue; have.add(key);
+      Vocab.entries.push({ word: w.word, key, vi: w.vi, topic: pk.title.replace(/ \(\d\/\d\)$/, ''), example: '', image: '', pack: pk.id });
+    }
+  }
+  if (typeof resetRank === 'function') resetRank();
   return Vocab.entries;
 }
 

@@ -132,6 +132,6 @@ function buildGrammarQueue(topic = 'all', n = 10) {
   return picked.map(it => (it.q.split(' ').length <= 14 && Math.random() < .25) ? grammarOrder(it) : grammarChoice(it));
 }
 
-function startGrammar(topic = 'all') {
-  runLesson({ queue: buildGrammarQueue(topic), words: [], ctx: null, kind: 'grammar', mode: topic, redo: () => startGrammar(topic) });
+function startGrammar(topic = 'all', onDone) {
+  runLesson({ queue: buildGrammarQueue(topic), words: [], ctx: null, kind: 'grammar', mode: topic, redo: () => startGrammar(topic, onDone), onDone });
 }

@@ -56,6 +56,7 @@ function skillDone(skill, band) {
 function chainDone() {
   const b = CHAIN.bands, vals = ['L', 'R', 'W', 'S'].map(k => b[k]).filter(x => x != null);
   const overall = roundBand(vals.reduce((a, c) => a + c, 0) / vals.length); CHAIN = null;
+  if (typeof markNode === 'function') markNode('M:full', { stars: overall >= 6.5 ? 3 : overall >= 6 ? 2 : 1 });
   fsRoot().innerHTML = `<div class="done"><div class="trophy">🏅</div><h2>Hoàn thành bài thi thử!</h2><div class="bandbig">${overall}</div><div class="center muted">Band tổng ước lượng</div>
     <div class="bands">${[['L', 'Listening'], ['R', 'Reading'], ['W', 'Writing'], ['S', 'Speaking']].map(([k, n]) => `<div class="bandtile"><b>${b[k] ?? '–'}</b><span>${n}</span></div>`).join('')}</div>
     <p>${overall >= 6.5 ? '🎉 Bạn đã đạt mục tiêu 6.5 trong bài thi thử này!' : `Còn cách mục tiêu 6.5 khoảng ${(6.5 - overall).toFixed(1)} band – hãy xem kỹ kỹ năng thấp nhất và ôn thêm.`}</p>

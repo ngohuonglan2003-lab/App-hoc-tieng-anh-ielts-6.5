@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cẩm nang tự học IELTS 6.5</title>
+<style>
+  :root{--ink:#222;--muted:#666;--line:#ddd;--g:#3f9e00;--b:#1478b8;--soft:#f5f7f2}
+  @page{size:A4;margin:16mm 15mm 18mm}
+  body{font-family:Inter,"DejaVu Sans",Arial,sans-serif;color:var(--ink);font-size:10.5pt;line-height:1.55;margin:0;background:#fff}
+  main{max-width:780px;margin:0 auto;padding:16px}
+  h1{font-size:30pt;color:var(--g);margin:0 0 6px;line-height:1.1}
+  h2{font-size:17pt;color:var(--g);border-bottom:2px solid var(--g);padding-bottom:4px;margin:28px 0 10px;break-after:avoid}
+  h3{font-size:12.5pt;color:var(--b);margin:18px 0 6px;break-after:avoid}
+  h4{margin:12px 0 4px;break-after:avoid}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9.5pt;break-inside:auto}
+  th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  tr{break-inside:avoid}
+  .cover{min-height:92vh;display:flex;flex-direction:column;justify-content:center;break-after:page}
+  .cover .sub{font-size:14pt;color:var(--muted)}
+  .box{background:var(--soft);border-left:4px solid var(--g);padding:8px 12px;margin:10px 0;break-inside:avoid}
+  .warn{border-left-color:#e08a00;background:#fff7e8}
+  .lesson{break-inside:avoid-page;border:1px solid var(--line);border-radius:8px;padding:6px 12px;margin:10px 0}
+  .quiz{font-size:9.5pt;color:#333}.quiz li{margin:2px 0}
+  .ans{color:var(--g);font-weight:700}
+  .cols{columns:2;column-gap:22px;font-size:9.5pt}.cols div{break-inside:avoid}
+  .pb{break-before:page}
+  .toc li{margin:3px 0}
+  .muted{color:var(--muted)}
+  a{color:var(--b)}
+</style>
+</head>
+<body>
+<main id="doc">Đang tạo cẩm nang…</main>
+<script src="../js/road-data.js"></script>
+<script src="../js/grammar.js"></script>
+<script>
+const E = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const noEmoji = s => s.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu, '').replace(/ {2,}/g, ' ');
+const nodeName = id => { const t = id[0], a = id.slice(2); return ({ L: () => LESSONS[a].title, V: () => PACKS[a].title, T: () => 'Từ vựng chủ đề ' + a, G: () => 'Ngữ pháp: ' + a, B: () => 'Thử thách cuối chặng', M: () => 'Thi thử IELTS đầy đủ (4 kỹ năng)' })[t](); };
+const weeks = ['Tuần 1–2', 'Tuần 3–5', 'Tuần 6–9', 'Tuần 10–13', 'Tuần 14–16'];
+const stageBooks = {
+  1: 'Complete IELTS Bands 4–5; English Grammar in Use (Intermediate); LearnEnglish (British Council); BBC 6 Minute English.',
+  2: 'Complete IELTS Bands 5–6.5 hoặc The Official Cambridge Guide to IELTS (phần Reading, Listening, Writing Task 1); IELTS Vocabulary up to Band 6.0.',
+  3: 'The Official Cambridge Guide to IELTS (Writing Task 2, Speaking); Collins Reading/Listening for IELTS; bắt đầu làm từng phần đề Cambridge IELTS (sách cũ hơn).',
+  4: 'IELTS Grammar for Bands 6.5 and above; Collins Writing for IELTS; Cambridge IELTS (làm trọn từng kỹ năng, chấm điểm).',
+  5: 'IELTS Vocabulary for Bands 6.5 and above; English Collocations in Use; 4–6 đề Cambridge IELTS mới nhất làm đủ giờ như thi thật.'
+};
+
+let h = '';
+h += `<section class="cover"><h1>Cẩm nang tự học<br>IELTS Academic 6.5</h1>
+<p class="sub">Lộ trình 5 chặng từ dễ đến khó · sách & tài liệu nên dùng · toàn bộ bài lý thuyết, ngữ pháp và từ vựng trong app</p>
+<p class="muted">Tạo ngày ${new Date().toLocaleDateString('vi-VN')} · Đi kèm web app “IELTS 6.5 – Học từ vựng kiểu Duolingo”</p>
+<div class="box warn"><b>Về bản quyền:</b> Cẩm nang này KHÔNG chứa nội dung sao chép từ sách có bản quyền. Các bài lý thuyết, câu hỏi và đề luyện là nội dung tự soạn dựa trên định dạng đề IELTS công khai. Sách được giới thiệu để bạn mua bản chính hãng hoặc mượn ở thư viện; đề mẫu miễn phí có link chính thức.</div></section>`;
+
+h += `<h2>Mục lục</h2><ol class="toc">
+<li>Hiểu bài thi IELTS Academic & mục tiêu 6.5</li><li>Lộ trình 5 chặng (dễ → khó)</li><li>Lịch học gợi ý 16 tuần & thói quen mỗi ngày</li>
+<li>Test đầu vào & kiểm tra định kỳ – cách học nhanh nhất</li><li>Sách & tài liệu nên dùng</li><li>Toàn bộ bài lý thuyết kỹ năng (kèm quiz & đáp án)</li>
+<li>Ngữ pháp trọng tâm (65 câu có giải thích)</li><li>Danh sách từ vựng theo lộ trình</li><li>Cách dùng app</li></ol>`;
+
+/* 1. Đề thi */
+h += `<h2 class="pb">1. Hiểu bài thi IELTS Academic & mục tiêu 6.5</h2>
+<table><tr><th>Kỹ năng</th><th>Thời gian</th><th>Cấu trúc</th><th>Mục tiêu cho 6.5</th></tr>
+<tr><td>Listening</td><td>~30 phút (+10 phút chép đáp án nếu thi giấy)</td><td>40 câu, 4 phần: hội thoại đời thường → độc thoại → thảo luận học thuật → bài giảng</td><td>26–29 câu đúng ≈ 6.5</td></tr>
+<tr><td>Reading</td><td>60 phút</td><td>40 câu, 3 bài đọc dài, độ khó tăng dần</td><td>27–29 câu đúng ≈ 6.5</td></tr>
+<tr><td>Writing</td><td>60 phút</td><td>Task 1 (≥150 từ, mô tả biểu đồ/bảng/quy trình/bản đồ) · Task 2 (≥250 từ, nghị luận) – Task 2 tính gấp đôi</td><td>Đủ ý, đúng dạng đề, ít lỗi, có câu phức</td></tr>
+<tr><td>Speaking</td><td>11–14 phút</td><td>Part 1 hỏi đáp · Part 2 nói 1–2 phút theo thẻ (1 phút chuẩn bị) · Part 3 thảo luận</td><td>Trôi chảy, mở rộng ý, phát âm rõ</td></tr></table>
+<div class="box"><b>Cách tính Overall:</b> trung bình 4 kỹ năng, làm tròn đến 0.5 gần nhất (x.25 → x.5; x.75 → x+1). Ví dụ L 7.0 · R 6.5 · W 6.0 · S 6.5 → 26 ÷ 4 = 6.5. Nên đặt mục tiêu không kỹ năng nào dưới 6.0 vì nhiều trường/visa yêu cầu điểm tối thiểu từng kỹ năng.</div>
+<h3>Bảng quy đổi điểm (thang 40 câu, bảng Academic công bố rộng rãi)</h3>
+<table><tr><th>Band</th><th>Listening (câu đúng)</th><th>Reading Academic (câu đúng)</th></tr>
+${[['9', '39–40', '39–40'], ['8.5', '37–38', '37–38'], ['8', '35–36', '35–36'], ['7.5', '32–34', '33–34'], ['7', '30–31', '30–32'], ['6.5', '26–29', '27–29'], ['6', '23–25', '23–26'], ['5.5', '18–22', '19–22'], ['5', '16–17', '15–18'], ['4.5', '13–15', '13–14'], ['4', '10–12', '10–12']].map(r => `<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</table>
+<h3>Band 6.5 Writing & Speaking cần gì? (tóm tắt diễn giải, không phải văn bản chính thức)</h3>
+<table><tr><th>Tiêu chí</th><th>Writing</th><th>Speaking</th></tr>
+<tr><td>Nội dung / Trôi chảy</td><td>Trả lời đủ mọi phần của đề, quan điểm rõ, ý được phát triển có ví dụ</td><td>Nói được dài, ít ngập ngừng, dùng từ nối tự nhiên</td></tr>
+<tr><td>Mạch lạc</td><td>Chia đoạn rõ, mỗi đoạn một ý, từ nối đa dạng không lạm dụng</td><td>Ý sắp xếp hợp lý, có lý do & ví dụ</td></tr>
+<tr><td>Từ vựng</td><td>Có một số từ ít phổ biến & collocation, lỗi từ không gây hiểu sai</td><td>Đủ từ để bàn chủ đề, biết diễn đạt lại khi thiếu từ</td></tr>
+<tr><td>Ngữ pháp</td><td>Kết hợp câu đơn & câu phức, phần lớn câu không lỗi</td><td>Kết hợp câu đơn & phức, lỗi không ảnh hưởng hiểu</td></tr></table>
+<p class="muted">Bộ mô tả band chính thức (IELTS band descriptors) có trên ielts.org – nên đọc bản gốc khi tự chấm bài.</p>`;
+
+/* 2. Lộ trình */
+h += `<h2 class="pb">2. Lộ trình 5 chặng (dễ → khó)</h2>
+<p>Mỗi chặng gồm bài kỹ năng (lý thuyết + quiz), ngữ pháp, gói từ vựng và một <b>thử thách cuối chặng</b>. Hoàn thành hết chặng mới mở khóa chặng sau – hoặc dùng <b>“Vượt chặng”</b> nếu bạn đã biết (đúng ≥ 85%).</p>`;
+for (const st of STAGES) {
+  h += `<h3>Chặng ${st.id} · ${E(st.name)} — mục tiêu band ${st.band} (${weeks[st.id - 1]})</h3><p>${E(st.desc)}</p>
+  <table><tr><th>#</th><th>Bài trong app</th><th>Loại</th></tr>${st.nodes.map((id, i) => `<tr><td>${i + 1}</td><td>${E(nodeName(id))}</td><td>${({ L: 'Kỹ năng', V: 'Từ vựng', T: 'Từ vựng', G: 'Ngữ pháp', B: 'Kiểm tra', M: 'Thi thử' })[id[0]]}</td></tr>`).join('')}</table>
+  <div class="box"><b>Sách & tài liệu đi kèm chặng này:</b> ${E(stageBooks[st.id])}</div>`;
+}
+
+/* 3. Lịch học */
+h += `<h2 class="pb">3. Lịch học gợi ý 16 tuần</h2>
+<p>Dành cho người học 60–90 phút/ngày, xuất phát khoảng band 4.0–4.5. Nếu test đầu vào cho phép bỏ qua chặng, hãy rút ngắn tương ứng.</p>
+<table><tr><th>Giai đoạn</th><th>Trọng tâm</th><th>Luyện thêm ngoài app</th></tr>
+<tr><td>Tuần 1–2 (Chặng 1)</td><td>Hiểu đề, ngữ pháp nền, 48 từ chủ đề quen thuộc, Listening Part 1, Speaking Part 1</td><td>Mỗi ngày 1 bài English Grammar in Use + 1 tập BBC 6 Minute English</td></tr>
+<tr><td>Tuần 3–5 (Chặng 2)</td><td>Skimming/scanning, T/F/NG, bản đồ, Task 1 xu hướng, Part 2, AWL 1</td><td>Mỗi tuần 2 bài đọc + 2 phần nghe từ sách luyện; viết 2 bài Task 1</td></tr>
+<tr><td>Tuần 6–9 (Chặng 3)</td><td>Matching headings, điền câu, Part 3 Listening, Task 2 Opinion, Speaking Part 3, AWL 2</td><td>Mỗi tuần 2 bài Task 2 (nhờ AI/Claude chấm), 1 bài đọc đủ giờ</td></tr>
+<tr><td>Tuần 10–13 (Chặng 4)</td><td>Matching info, bài giảng Part 4, Task 1 đủ dạng, Task 2 đủ dạng, mạch lạc, AWL 3</td><td>Mỗi tuần 1 đề Reading + 1 đề Listening Cambridge đủ giờ</td></tr>
+<tr><td>Tuần 14–16 (Chặng 5)</td><td>Paraphrase, collocation, ngữ pháp 6.5, trôi chảy, chiến lược phòng thi</td><td>Mỗi tuần 1–2 đề thi thử đầy đủ 4 kỹ năng, phân tích lỗi sai</td></tr></table>
+<h3>Một ngày học mẫu (75 phút)</h3>
+<table><tr><th>Thời lượng</th><th>Việc cần làm</th></tr>
+<tr><td>15 phút</td><td>App: “Học bài hôm nay” – từ mới + ôn từ đến hạn (lặp lại ngắt quãng)</td></tr>
+<tr><td>20 phút</td><td>App: 1–2 bài tiếp theo trên Lộ trình (kỹ năng / ngữ pháp / gói từ)</td></tr>
+<tr><td>25 phút</td><td>Luyện từ sách theo chặng (1 bài đọc hoặc 1 phần nghe hoặc 1 đoạn viết)</td></tr>
+<tr><td>15 phút</td><td>App: tab Nói – 1 lượt Part 1 hoặc Part 2, nghe lại & sửa</td></tr></table>`;
+
+/* 4. Test */
+h += `<h2>4. Test đầu vào & kiểm tra định kỳ – cách học nhanh nhất</h2>
+<ul><li><b>Test đầu vào (một lần):</b> đi từ chặng 1 → 5. Phần nào trả lời đúng hết được đánh dấu đã biết; chặng đạt ≥ 85% được bỏ qua toàn bộ; chặng dưới 60% thì dừng – đó là điểm xuất phát. Từ vựng trả lời đúng được xếp vào hộp ghi nhớ cao nên chỉ ôn nhẹ.</li>
+<li><b>Kiểm tra tuần (15 câu)</b> và <b>kiểm tra tháng (30 câu)</b>: lấy ngẫu nhiên từ các phần đã học, ưu tiên phần lâu chưa kiểm tra. Phần sai được đánh dấu ⚠ “cần ôn” trên bản đồ, giảm sao; từ sai được đưa vào lượt ôn sớm nhất. App tự nhắc khi đến hạn.</li>
+<li><b>Vượt chặng:</b> bất cứ lúc nào thấy chặng quá dễ, làm bài kiểm tra 20 câu; đạt ≥ 85% là qua.</li>
+<li><b>Thi thử đầy đủ:</b> mỗi tháng ít nhất 1 lần (tab Thi thử) để theo dõi band 4 kỹ năng.</li></ul>`;
+
+/* 5. Tài liệu */
+h += `<h2 class="pb">5. Sách & tài liệu nên dùng</h2>
+<table><tr><th>Tài liệu</th><th>Tác giả / NXB</th><th>Dùng ở</th><th>Dùng để</th></tr>
+${RESOURCES.map(r => `<tr><td><b>${E(r.name)}</b>${r.url ? `<br><a href="${E(r.url)}">${E(r.url)}</a>` : ''}<br><span class="muted">${r.paid ? 'Sách (mua/mượn)' : 'Miễn phí'}</span></td><td>${E(r.by)}</td><td>${E(r.stage)}</td><td>${E(r.use)}</td></tr>`).join('')}</table>
+<div class="box"><b>Lưu ý chọn sách:</b> Cambridge đã đổi tên một số sách từ vựng/ngữ pháp IELTS (ví dụ “Cambridge Grammar for IELTS” → “IELTS Grammar for Bands 6.5 and above”) – kiểm tra tên hiện hành khi mua. Không cần mua tất cả: mỗi chặng 1 giáo trình chính + đề Cambridge là đủ.</div>`;
+
+/* 6. Bài lý thuyết */
+h += `<h2 class="pb">6. Bài lý thuyết kỹ năng</h2>`;
+for (const st of STAGES) {
+  h += `<h3>Chặng ${st.id} · ${E(st.name)}</h3>`;
+  for (const id of st.nodes.filter(x => x[0] === 'L')) {
+    const l = LESSONS[id.slice(2)];
+    h += `<div class="lesson"><h4>${E(l.title)}</h4>${noEmoji(l.body)}<p><b>Quiz tự kiểm tra:</b></p><ol class="quiz">${l.quiz.map(q => `<li>${E(q[0])}<br><span class="ans">→ ${E(q[1][q[2]])}</span>${q[3] ? ` <span class="muted">(${E(q[3])})</span>` : ''}</li>`).join('')}</ol></div>`;
+  }
+}
+
+/* 7. Ngữ pháp */
+h += `<h2 class="pb">7. Ngữ pháp trọng tâm</h2>`;
+for (const t of G_TOPICS) {
+  h += `<h3>${E(t)}</h3><table><tr><th>Câu</th><th>Đáp án</th><th>Giải thích</th></tr>${G[t].map(([q, a, , why]) => `<tr><td>${E(q)}</td><td class="ans">${E(a)}</td><td>${E(why)}</td></tr>`).join('')}</table>`;
+}
+
+/* 8. Từ vựng */
+h += `<h2 class="pb">8. Danh sách từ vựng theo lộ trình</h2>
+<p class="muted">Ngoài các gói dưới đây, app còn dùng từ trong file <code>vocab/tu-vung.txt</code> của bạn (các chủ đề Environment, Education, Technology, Health, Society, Work, Task 1, Academic). Academic Word List (AWL) do Averil Coxhead (2000) xây dựng: 570 họ từ học thuật phổ biến; sublist 1 thường gặp nhất.</p>`;
+const seenPack = new Set();
+for (const pk of Object.values(PACKS)) {
+  const base = pk.title.replace(/ \(\d\/\d\)$/, ''); const all = Object.values(PACKS).filter(x => x.title.replace(/ \(\d\/\d\)$/, '') === base);
+  if (seenPack.has(base)) continue; seenPack.add(base);
+  h += `<h3>${E(base)} (${all.reduce((a, x) => a + x.words.length, 0)} từ)</h3><div class="cols">${all.flatMap(x => x.words).map(w => `<div><b>${E(w.word)}</b> – ${E(w.vi)}</div>`).join('')}</div>`;
+}
+
+/* 9. App */
+h += `<h2 class="pb">9. Cách dùng app</h2>
+<ol><li>Mở tab <b>Lộ trình</b> → làm <b>Test đầu vào</b> để bỏ qua phần đã biết.</li>
+<li>Mỗi ngày bấm <b>“Học tiếp”</b> trên bản đồ (1–2 bài) và <b>“Học bài hôm nay”</b> ở tab Luyện (ôn từ vựng đến hạn).</li>
+<li>Cuối mỗi chặng: <b>Thử thách cuối chặng</b> (đúng ≥ 70%) để mở chặng mới, nhận 50 xu.</li>
+<li>Khi app nhắc: làm <b>Kiểm tra tuần / tháng</b>, rồi ôn các phần bị đánh dấu ⚠.</li>
+<li>Tab <b>Nói</b> luyện Speaking 3 phần; tab <b>Thi thử</b> làm đề 4 kỹ năng. Bật AI ở Cài đặt (tùy chọn) để có đề mới & chấm Writing/Speaking chi tiết.</li>
+<li>Thêm từ của riêng bạn vào <code>vocab/tu-vung.txt</code>; đồng bộ điện thoại ↔ iPad ở Cài đặt.</li></ol>
+<p class="muted">Nguồn thông tin định dạng đề: British Council (takeielts.britishcouncil.org), IDP (ielts.idp.com), IELTS.org, Cambridge English.</p>`;
+
+document.getElementById('doc').innerHTML = h;
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>
