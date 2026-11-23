@@ -265,7 +265,7 @@ function wordCardHTML(w) {
     <button class="chip" data-act="slow">🐢 Chậm</button>${SR ? '<button class="chip" data-act="mic">🎤 Luyện nói</button>' : ''}</div>
   <div class="micres"></div>
   <p class="vi">🇻🇳 ${esc(w.vi || '(chưa có nghĩa – thêm ở cột 2 trong file)')}</p>
-  ${w.meanings.length ? `<div class="sec"><h4>Định nghĩa</h4>${w.meanings.map(m => `<div class="mean"><span class="pos">${esc(m.pos)}</span> ${m.defs.map(d => esc(d.def)).join(' <i>/</i> ')}</div>`).join('')}</div>` : ''}
+  ${w.meanings.length ? `<div class="sec"><h4>Định nghĩa</h4>${w.meanings.map((m, mi) => `<div class="mean"><span class="pos">${esc(m.pos)}</span> <span class="defx" data-mi="${mi}">${m.defs.map(d => esc(d.def)).join(' <i>/</i> ')}</span> <button class="chip sm" data-act="trdef" data-mi="${mi}">🇻🇳 Dịch</button><div class="deftr" data-mi="${mi}"></div></div>`).join('')}</div>` : ''}
   ${w.examples.length ? `<div class="sec"><h4>Câu mẫu</h4><ul class="exs">${w.examples.slice(0, 4).map((e, i) => `<li><button class="mini" data-act="sayex" data-i="${i}" aria-label="Nghe câu">🔊</button><div><div>${hl(e.en, w.word)}</div><div class="exvi" data-i="${i}">${esc(e.vi || '')}</div>${e.vi ? '' : `<button class="link" data-act="tr" data-i="${i}">Dịch sang tiếng Việt</button>`}</div></li>`).join('')}</ul></div>` : ''}
   ${w.synonyms.length ? `<div class="sec"><h4>Từ đồng nghĩa</h4><div class="tags">${w.synonyms.map(s => `<span class="tag g">${esc(s)}</span>`).join('')}</div></div>` : ''}
   ${w.antonyms.length ? `<div class="sec"><h4>Từ trái nghĩa</h4><div class="tags">${w.antonyms.map(s => `<span class="tag r">${esc(s)}</span>`).join('')}</div></div>` : ''}
@@ -295,6 +295,15 @@ function bindWordCard(root, w) {
     if (act === 'say') pronounce(w, b.dataset.a || Store.profile.accent);
     else if (act === 'slow') pronounce(w, Store.profile.accent, true);
     else if (act === 'sayex') speak(w.examples[+b.dataset.i].en, { lang: Store.profile.accent === 'uk' ? 'en-GB' : 'en-US' });
+    else if (act === 'trdef') {
+      const mi = +b.dataset.mi, out = $(`.deftr[data-mi="${mi}"]`, root);
+      if (out.dataset.done) { out.hidden = !out.hidden; b.textContent = out.hidden ? '🇻🇳 Dịch' : '🇻🇳 Ẩn'; return; }
+      const text = w.meanings[mi].defs.map(d => d.def).join('. ');
+      b.textContent = 'Đang dịch…'; out.dataset.done = '1';
+      const t = await translateVi(text);
+      out.textContent = t ? '🇻🇳 ' + t : 'Không dịch được lúc này, thử lại sau.';
+      b.textContent = '🇻🇳 Ẩn';
+    }
     else if (act === 'tr') {
       const i = +b.dataset.i, box = $(`.exvi[data-i="${i}"]`, root);
       b.textContent = 'Đang dịch…';
