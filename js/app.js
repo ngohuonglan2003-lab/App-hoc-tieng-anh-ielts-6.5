@@ -229,6 +229,8 @@ function bindVoiceSettings() {
       eleven: { key: $('#vo-ekey').value.trim(), us: $('#vo-eus').value.trim() || c.eleven.us, uk: $('#vo-euk').value.trim() || c.eleven.uk } });
   };
   $$('#voicecard select, #voicecard input').forEach(el => el.onchange = save);
+  // Chọn giọng cụ thể thì áp dụng luôn cho từ đơn (không dùng file thu sẵn của từ điển nữa)
+  ['#vo-us', '#vo-uk'].forEach(sel => $(sel).addEventListener('change', () => { if ($('#vo-src').value !== 'tts') $('#vo-src').value = 'tts'; save(); }));
   const demo = 'Governments must act now to mitigate the effects of climate change.';
   $('#vo-t-us').onclick = () => { save(); const c = Voice.cfg(); Voice.stop(); Voice.browserLine(demo, 'en-US', c.rate); };
   $('#vo-t-uk').onclick = () => { save(); const c = Voice.cfg(); Voice.stop(); Voice.browserLine(demo, 'en-GB', c.rate); };
